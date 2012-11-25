@@ -60,10 +60,20 @@ users.list.fetch.before(function(req, res, context) {
 
 ### Pagination
 
-List routes support pagination via `offset` and `count` properties.  Find metadata about pagination and number of results in the `Content-Range` response header.
+List routes support pagination via `offset` and `count` query parameters.  Find metadata about pagination and number of results in the `Content-Range` response header.
 
+```bash
+# get the third page of results
+$ curl http://localhost/users?offset=200&count=100
+200 OK
+Content-Type: application/json
+Content-Range: items 200-299/3230
 
-
+[
+  { name: "James Conrad" },
+  ...
+]
+```
 
 ## Epilogue API
 
