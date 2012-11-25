@@ -1,15 +1,18 @@
 # Epilogue
 
-Create flexible REST endpoints and controllers from Sequelize models in your Express app
+Create flexible REST endpoints and controllers from Sequelize models in your Express app.
 
-## Getting Started
+### Start with a model
 
-Create a Sequelize model:
+Define your models with Sequelize.  Describe columns, their attributes, and entity relationships, etc.
+
 ```javascript
 var User = sequelize.define(...);
 ```
 
-Create a resource with endpoints:
+#### Create a resource
+
+Load up `epilogue` and provide a reference to your Express app.  Then create resources by specifying a model and endpoints.
 
 ```javascript
 var rest = require('epilogue');
@@ -21,16 +24,20 @@ var users = rest.resource({
 });
 ```
 
+### Controllers and endpoints
+
 On the server we now have the following controllers:
 
 | Controller | Endpoint | Description |
 |------------|----------|-------------|
-| users.create | POST /user | Create a user |
+| users.create | POST /users | Create a user |
 | users.list | GET /users  | Get a listing of users |
 | users.read | GET /users/:id | Get details about a user |
 | users.update | POST /users/:id | Update a user|
 | users.delete | DELETE /users/:id | Delete a user |
 
+
+### Customize behavior
 
 Our `users` resource has properties for each of the controller actions.  Controller actions in turn have hooks for setting and overriding behavior at each step of the request.  We have these milestones to work with: `start`, `auth`, `fetch`, `data`, `write`, `send`, and `complete`.
 
@@ -52,7 +59,7 @@ users.list.fetch.before(function(req, res, context) {
 })
 ```
 
-## Epilogue Documentation
+## Epilogue API
 
 #### initialize()
 
