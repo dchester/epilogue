@@ -1,0 +1,19 @@
+{
+  "name": "node-epilogue",
+  "description": "Create REST resources and controllers with Sequelize and Express",
+  "version": "0.0.1",
+  "author": "David Chester <dchester@shutterstock.com>",
+  "scripts": {
+    "test": "node_modules/nodeunit/bin/nodeunit tests"
+  },
+  "devDependencies": {
+    "nodeunit": "*",
+    "sqlite3": "*"
+  },
+  "dependencies": {
+    "async": "*",
+    "sequelize": "*",
+    "express": "*",
+    "underscore": "*"
+  }
+}
