@@ -36,7 +36,6 @@ On the server we now have the following controllers:
 | users.update | POST /users/:id | Update a user|
 | users.delete | DELETE /users/:id | Delete a user |
 
-
 ### Customize behavior
 
 Our `users` resource has properties for each of the controller actions.  Controller actions in turn have hooks for setting and overriding behavior at each step of the request.  We have these milestones to work with: `start`, `auth`, `fetch`, `data`, `write`, `send`, and `complete`.
@@ -58,6 +57,13 @@ users.list.fetch.before(function(req, res, context) {
 	context.continue();
 })
 ```
+
+### Pagination
+
+List routes support pagination via `offset` and `count` properties.  Find metadata about pagination and number of results in the `Content-Range` response header.
+
+
+
 
 ## Epilogue API
 
@@ -107,7 +113,7 @@ Fetch data from the database for non-create actions according to `context.criter
 
 #### data(f)
 
-Manipulate the data from the database if needed.  Defaults to passthrough.
+Transform the data from the database if needed.  Defaults to passthrough.
 
 #### write(f)
 
