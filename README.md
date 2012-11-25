@@ -5,13 +5,13 @@ Create flexible REST endpoints and controllers from Sequelize models in your Exp
 ## Getting Started
 
 Create a Sequelize model:
-```
+```javascript
 var User = sequelize.define(...);
 ```
 
 Create a resource with endpoints:
 
-```
+```javascript
 var rest = require('epilogue');
 rest.initialize({ app: app });
 
@@ -23,7 +23,8 @@ var users = rest.resource({
 
 On the server we now have the following controllers:
 
-|| Controller || Endpoint || Description ||
+| Controller | Endpoint | Description |
+|------------|----------|-------------|
 | users.create | POST /user | Create a user |
 | users.list | GET /users  | Get a listing of users |
 | users.read | GET /users/:id | Get details about a user |
@@ -33,7 +34,7 @@ On the server we now have the following controllers:
 
 Our `users` resource has properties for each of the controller actions.  Controller actions in turn have hooks for setting and overriding behavior at each step of the request.  We have these milestones to work with: `start`, `auth`, `fetch`, `data`, `write`, `send`, and `complete`.
 
-```
+```javascript
 // disallow deletes on users
 users.delete.auth(function(req, res, context) {
 	res.json(403, { error: "can't delete a user" });
@@ -43,7 +44,7 @@ users.delete.auth(function(req, res, context) {
 
 By default, `fetch`, `write`, and `send` milestones are defined, with the others left open.  We can set behavior for milestones directly as above, or we can add functionality before and after milestones too.
 
-```
+```javascript
 // check the cache first
 users.list.fetch.before(function(req, res, context) {
 	context.instance = cache.get(context.criteria);
@@ -53,7 +54,7 @@ users.list.fetch.before(function(req, res, context) {
 
 ## Epilogue Documentation
 
-##### initialize()
+#### initialize()
 
 Set defaults and give epilouge a reference to your express app.  Send the following parameters
 
@@ -61,7 +62,7 @@ Set defaults and give epilouge a reference to your express app.  Send the follow
 
 A reference to the Express application
 
-##### resource()
+#### resource()
 
 Create a resource and CRUD actions given a Sequelize model and endpoints.  Accepts these parameters:
 
@@ -73,7 +74,7 @@ Reference to a Sequelize model
 
 Create a resource, given a Sequelize model and endpoints.  Specify endpoints as an array with two sinatra-style URL paths in plural and singular form (e.g., `['/users', '/users/:id']`).
 
-##### actions
+###### actions
 
 Create only the specified list of actions for the resource.  Options include `create`, `list`, `read`, `update`, and `delete`.  Defaults to all.
 
@@ -83,49 +84,57 @@ Milestones provide opportunities to run custom application code at various impor
 
 Resources have properties for each controller action: `create`, `list`, `read`, `update`, and `delete`.  Also find a meta property `all` as a convenience for hooking into milestones across all controllers.  Each of those properties in turn has methods for setting custom behavior.
 
-For each milestone on a given controller we accept a function specifying custom behavior:
+For each milestone on a given controller we accept a function specifying custom behavior.  Functions can expect request and response parameters as well as a context object.
 
-##### authorize(f)
+#### start(f)
 
-Authorize the request according to the function passed in.  Request continues normally if the function returns true, or otherwise returns a 403.
+Run at the beginning of the request.  Defaults to passthrough.
 
-##### validate(f)
+#### auth(f)
 
-Validate the request according to the function passed in.  Request continues normally if the function returns true, or otherwise returns a 400.
+Authorize the request.  Defaults to passthrough.
 
-##### data(f)
+#### fetch(f)
 
-Transform or translate the data before it's written or returned back in the response.
+Fetch data from the database for non-create actions according to `context.criteria`, writing to `context.instance`.
 
-##### complete(f)
+#### data(f)
 
-Run the specified function when the request is complete, regardless of w
+Manipulate the data from the database if needed.  Defaults to passthrough.
 
-##### error(f)
+#### write(f)
 
-Run the specified function when the request is complete
+Write to the database for actions that write, reading from `context.attributes`.
 
-#### Milestones & Context
+#### send(f)
+
+Send the HTTP response, headers along with the data in `context.instance`.
+
+#### complete(f)
+
+Run the specified function when the request is complete, regardless of the status of the response.
+
+### Milestones & Context
 
 Milestone methods take functions which can expect as paramaters a request, a response, a resource, and a context. Context objects contain key properties about the state of the resource at the given request milestone, as well as methods give back control.
 
-###### instance
+###### context.instance
 
 Instance of a dataset fetched via the supplied model.  May be undefined for early milestones prior to the fetching of the data.
 
-###### attributes
+###### context.attributes
 
 Attribues supplied by the request, usually in anticipation of creating or updating an instance.
 
-###### criteria
+###### context.criteria
 
 Criteria for fetching, usually supplied by request parameters.
 
-###### continue()
+###### context.continue()
 
 Continue with the request, on through the rest of the milestones.
 
-###### stop()
+###### context.stop()
 
 Indicate that this should be the last milestone to be processed.
 
