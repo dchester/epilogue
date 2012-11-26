@@ -4,7 +4,7 @@ Create flexible REST endpoints and controllers from Sequelize models in your Exp
 
 ### Start with a model
 
-Define your models with Sequelize.  Describe columns, their attributes, and entity relationships, etc.
+Define your models with [Sequelize](http://www.sequelizejs.com/).  Describe columns, their attributes, and entity relationships, etc.
 
 ```javascript
 var User = sequelize.define(...);
@@ -48,7 +48,7 @@ users.delete.auth(function(req, res, context) {
 })
 ```
 
-By default, `fetch`, `write`, and `send` milestones are defined, with the others left open.  We can set behavior for milestones directly as above, or we can add functionality before and after milestones too.
+By default, `fetch`, `write`, and `send` milestones are defined, with the others left open.  We can set behavior for milestones directly as above, or we can add functionality before and after milestones too:
 
 ```javascript
 // check the cache first
