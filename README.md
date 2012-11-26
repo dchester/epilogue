@@ -10,7 +10,7 @@ Define your models with [Sequelize](http://www.sequelizejs.com/).  Describe colu
 var User = sequelize.define(...);
 ```
 
-#### Create a resource
+### Create a resource
 
 Load up `epilogue` and provide a reference to your Express app.  Then create resources by specifying a model and endpoints.
 
@@ -139,7 +139,7 @@ Run the specified function when the request is complete, regardless of the statu
 
 ### Milestones & Context
 
-Milestone methods take functions which can expect as paramaters a request, a response, a resource, and a context. Context objects contain key properties about the state of the resource at the given request milestone, as well as methods give back control.
+Milestone methods take functions which can expect as paramaters a request, a response, and a context. Context objects contain key properties about the state of the resource at the given request milestone, as well as methods to give back control.
 
 ###### context.instance
 
