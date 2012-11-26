@@ -1,10 +1,10 @@
 # Epilogue
 
-Create flexible REST endpoints and controllers from Sequelize models in your Express app.
+Create flexible REST endpoints and controllers from Sequelize models in your Express app in Node.
 
 ### Start with a model
 
-Define your models with [Sequelize](http://www.sequelizejs.com/).  Describe columns, their attributes, and entity relationships, etc.
+Define your models with [Sequelize](http://www.sequelizejs.com/) on top of MySQL, Postgres, or SQLite.  Describe tables and columns and their attributes, model entity relationships, etc.
 
 ```javascript
 var User = sequelize.define(...);
@@ -12,7 +12,7 @@ var User = sequelize.define(...);
 
 ### Create a resource
 
-Load up `epilogue` and provide a reference to your Express app.  Then create resources by specifying a model and endpoints.
+Load up `epilogue` and provide a reference to your Express app.  Then create resources, specifying a model and endpoints.
 
 ```javascript
 var rest = require('epilogue');
@@ -78,28 +78,28 @@ Content-Range: items 200-299/3230
 ## Epilogue API
 
 #### initialize()
+ 
+Set defaults and give epilouge a reference to your express app.  Send the following parameters:
 
-Set defaults and give epilouge a reference to your express app.  Send the following parameters
-
-###### app
-
-A reference to the Express application
+> ###### app
+>
+> A reference to the Express application
 
 #### resource()
 
 Create a resource and CRUD actions given a Sequelize model and endpoints.  Accepts these parameters:
 
-###### model
-
-Reference to a Sequelize model
-
-###### endpoints
-
-Create a resource, given a Sequelize model and endpoints.  Specify endpoints as an array with two sinatra-style URL paths in plural and singular form (e.g., `['/users', '/users/:id']`).
-
-###### actions
-
-Create only the specified list of actions for the resource.  Options include `create`, `list`, `read`, `update`, and `delete`.  Defaults to all.
+> ###### model
+> 
+> Reference to a Sequelize model
+> 
+> ###### endpoints
+>
+> Specify endpoints as an array with two sinatra-style URL paths in plural and singular form (e.g., `['/users', '/users/:id']`).
+> 
+> ###### actions
+>
+> Create only the specified list of actions for the resource.  Options include `create`, `list`, `read`, `update`, and `delete`.  Defaults to all.
 
 ### Milestones
 
@@ -107,7 +107,7 @@ Milestones provide opportunities to run custom application code at various impor
 
 Resources have properties for each controller action: `create`, `list`, `read`, `update`, and `delete`.  Also find a meta property `all` as a convenience for hooking into milestones across all controllers.  Each of those properties in turn has methods for setting custom behavior.
 
-For each milestone on a given controller we accept a function specifying custom behavior.  Functions can expect request and response parameters as well as a context object.
+For each milestone on a given controller we accept a function to specify custom behavior.  Functions can expect three parameters: a request, a response, and a context object.
 
 #### start(f)
 
@@ -141,23 +141,23 @@ Run the specified function when the request is complete, regardless of the statu
 
 Milestone methods take functions which can expect as paramaters a request, a response, and a context. Context objects contain key properties about the state of the resource at the given request milestone, as well as methods to give back control.
 
-###### context.instance
+##### context.instance
 
 Instance of a dataset fetched via the supplied model.  May be undefined for early milestones prior to the fetching of the data.
 
-###### context.attributes
+##### context.attributes
 
 Attribues supplied by the request, usually in anticipation of creating or updating an instance.
 
-###### context.criteria
+##### context.criteria
 
 Criteria for fetching, usually supplied by request parameters.
 
-###### context.continue()
+##### context.continue()
 
 Continue with the request, on through the rest of the milestones.
 
-###### context.stop()
+##### context.stop()
 
 Indicate that this should be the last milestone to be processed.
 
