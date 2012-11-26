@@ -65,7 +65,7 @@ List routes support pagination via `offset` and `count` query parameters.  Find 
 ```bash
 # get the third page of results
 $ curl http://localhost/users?offset=200&count=100
-200 OK
+HTTP/1.1 200 OK
 Content-Type: application/json
 Content-Range: items 200-299/3230
 
