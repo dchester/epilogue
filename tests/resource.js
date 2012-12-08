@@ -33,8 +33,8 @@ var truncate = function(callback) {
 module.exports = {
 
 	create: function(test) {
-		request.post({ 
-			url: "http://localhost:48281/users", 
+		request.post({
+			url: "http://localhost:48281/users",
 			json: { username: "arthur", email: "arthur@gmail.com" }
 
 		}, function(err, response, body) {
@@ -48,8 +48,8 @@ module.exports = {
 	},
 
 	read: function(test) {
-		request.post({ 
-			url: "http://localhost:48281/users", 
+		request.post({
+			url: "http://localhost:48281/users",
 			json: { username: "jamez", email: "jamez@gmail.com" }
 
 		}, function(err, response, body) {
@@ -123,8 +123,8 @@ module.exports = {
 	},
 
 	update: function(test) {
-		request.post({ 
-			url: "http://localhost:48281/users", 
+		request.post({
+			url: "http://localhost:48281/users",
 			json: { username: "emma", email: "emma@gmail.com" }
 
 		}, function(err, response, body) {
@@ -133,7 +133,7 @@ module.exports = {
 
 			var location = response.headers['location'];
 
-			request.post({ 
+			request.post({
 				url: "http://localhost:48281" + location,
 				json: { email: "emma@fmail.co.uk" }
 
@@ -153,8 +153,8 @@ module.exports = {
 	},
 
 	delete: function(test) {
-		request.post({ 
-			url: "http://localhost:48281/users", 
+		request.post({
+			url: "http://localhost:48281/users",
 			json: { username: "chicken", email: "chicken@gmail.com" }
 
 		}, function(err, response, body) {
@@ -198,7 +198,7 @@ module.exports = {
 	},
 
 	tearDown: function(callback) {
-		truncate(callback);	
+		truncate(callback);
 	}
 };
 
