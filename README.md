@@ -53,8 +53,17 @@ By default, `fetch`, `write`, and `send` milestones are defined, with the others
 ```javascript
 // check the cache first
 users.list.fetch.before(function(req, res, context) {
-	context.instance = cache.get(context.criteria);
-	context.continue();
+
+	var instance = cache.get(context.criteria);
+
+	if (instance) {
+		// keep a reference to the instance and skip the fetch
+		context.instance = instance;
+		context.skip();
+	} else {
+		// cache miss; we continue on
+		context.continue();
+	}
 })
 ```
 
@@ -160,6 +169,10 @@ Continue with the request, on through the rest of the milestones.
 ##### context.stop()
 
 Indicate that this should be the last milestone to be processed.
+
+##### context.skip()
+
+Skip to the next milestone, usually called from `before`.
 
 ## License
 
