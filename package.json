@@ -3,6 +3,7 @@
   "description": "Create REST resources and controllers with Sequelize and Express",
   "version": "0.0.2",
   "author": "David Chester <dchester@shutterstock.com>",
+  "main": "lib/",
   "scripts": {
     "test": "node_modules/nodeunit/bin/nodeunit tests"
   },
