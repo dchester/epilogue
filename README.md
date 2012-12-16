@@ -93,6 +93,10 @@ Set defaults and give epilouge a reference to your express app.  Send the follow
 > ###### app
 >
 > A reference to the Express application
+>
+> ###### base
+>
+> Prefix to prepend to resource endpoints
 
 #### resource()
 
