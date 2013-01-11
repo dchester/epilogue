@@ -26,7 +26,7 @@ var users = rest.resource({
 
 ### Controllers and endpoints
 
-On the server we now have the following controllers:
+On the server we now have the following controllers and endpoints:
 
 | Controller | Endpoint | Description |
 |------------|----------|-------------|
@@ -38,7 +38,7 @@ On the server we now have the following controllers:
 
 ### Customize behavior
 
-Our `users` resource has properties for each of the controller actions.  Controller actions in turn have hooks for setting and overriding behavior at each step of the request.  We have these milestones to work with: `start`, `auth`, `fetch`, `data`, `write`, `send`, and `complete`.
+Of course it's likely that we'll want more flexibility.  Our `users` resource has properties for each of the controller actions.  Controller actions in turn have hooks for setting and overriding behavior at each step of the request.  We have these milestones to work with: `start`, `auth`, `fetch`, `data`, `write`, `send`, and `complete`.
 
 ```javascript
 // disallow deletes on users
