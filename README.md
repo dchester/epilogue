@@ -69,7 +69,7 @@ users.list.fetch.before(function(req, res, context) {
 
 ### Pagination
 
-List routes support pagination via `offset` and `count` query parameters.  Find metadata about pagination and number of results in the `Content-Range` response header.
+List routes support pagination via `offset` or `page` and `count` query parameters.  Find metadata about pagination and number of results in the `Content-Range` response header.
 
 ```bash
 # get the third page of results
