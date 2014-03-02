@@ -12,15 +12,14 @@
     "url": "https://github.com/dchester/epilogue.git"
   },
   "devDependencies": {
-    "nodeunit": "*",
-    "sqlite3": "*",
-    "nodeunit": "*",
-    "request": "*"
+    "sqlite3": "~2.2.0",
+    "nodeunit": "~0.8.6",
+    "request": "~2.34.0",
+    "sequelize": "~2.0.0-dev10",
+    "express": "~3.4.8"
   },
   "dependencies": {
-    "async": "*",
-    "sequelize": "*",
-    "express": ">= 3.0.0",
-    "underscore": "*"
+    "async": "~0.2.10",
+    "lodash": "~2.4.1"
   }
 }
