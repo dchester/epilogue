@@ -4,14 +4,29 @@ var express = require('express'),
     expect = require('chai').expect,
     Sequelize = require('sequelize'),
     _ = require('lodash'),
-    rest = require('../lib'),
-    db = require('./lib/db'),
-    User = require('./lib/user');
+    rest = require('../lib');
 
 var test = {};
 describe('Resource(basic)', function() {
+  before(function() {
+    test.db = new Sequelize('main', null, null, {
+      storage: "/tmp/epilogue-test.sqlite",
+      dialect: 'sqlite',
+      logging: false
+    });
+
+    test.User = test.db.define('users', { 
+      id:       { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true }, 
+      username: { type: Sequelize.STRING, unique: true }, 
+      email:    { type: Sequelize.STRING, unique: true, validate: { isEmail: true } } 
+    }, {
+      underscored: true,
+      timestamps: false
+    });
+  });
+
   beforeEach(function(done) {
-    db
+    test.db
       .sync({ force: true })
       .success(function() {
         test.app = express();
@@ -20,7 +35,7 @@ describe('Resource(basic)', function() {
 
         rest.initialize({ app: test.app });
         rest.resource({
-          model: User,
+          model: test.User,
           endpoints: ['/users', '/users/:id']
         });
 
@@ -34,7 +49,7 @@ describe('Resource(basic)', function() {
   });
 
   afterEach(function(done) {
-    db
+    test.db
       .getQueryInterface()
       .dropAllTables()
       .success(function() {
@@ -46,7 +61,7 @@ describe('Resource(basic)', function() {
   describe('create', function() {
     it('should create a record', function(done) {
       request.post({
-        url: 'http://localhost:48281/users',
+        url: test.baseUrl + '/users',
         json: { username: 'arthur', email: 'arthur@gmail.com' }
       }, function(error, response, body) {
         expect(response.statusCode).to.equal(201);
@@ -57,7 +72,7 @@ describe('Resource(basic)', function() {
 
     it('should not create a record with invalid data', function(done) {
       request.post({
-        url: 'http://localhost:48281/users'
+        url: test.baseUrl + '/users'
       }, function(error, response, body) {
         var result = _.isObject(body) ? body : JSON.parse(body);
         expect(response.statusCode).to.equal(400);
