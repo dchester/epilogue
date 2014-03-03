@@ -60,6 +60,18 @@ describe('Resource(basic)', function() {
         done();
       });
     });
+
+    it('should not create a record with invalid data', function(done) {
+      request.post({
+        url: 'http://localhost:48281/users'
+      }, function(error, response, body) {
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(response.statusCode).to.equal(400);
+        expect(result).to.contain.keys('error');
+        done();
+      });
+    });
+
   });
 
   describe('read', function() {
@@ -83,9 +95,28 @@ describe('Resource(basic)', function() {
         });
       });
     });
+
+    it('should return 404 for invalid record', function(done) {
+        request.get({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
+          expect(response.statusCode).to.equal(404);
+          var record = _.isObject(body) ? body: JSON.parse(body);
+          expect(record).to.contain.keys('error');
+          done();
+        });
+    });
+
   });
 
   describe('update', function() {
+    it('should return 404 for invalid record', function(done) {
+        request.put({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
+          expect(response.statusCode).to.equal(404);
+          var record = _.isObject(body) ? body: JSON.parse(body);
+          expect(record).to.contain.keys('error');
+          done();
+        });
+    });
+
     it('should update a record', function(done) {
       var userData = { username: 'jamez', email: 'jamez@gmail.com' };
       request.post({
@@ -113,6 +144,15 @@ describe('Resource(basic)', function() {
   });
 
   describe('delete', function() {
+    it('should return 404 for invalid record', function(done) {
+        request.del({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
+          expect(response.statusCode).to.equal(404);
+          var record = _.isObject(body) ? body: JSON.parse(body);
+          expect(record).to.contain.keys('error');
+          done();
+        });
+    });
+
     it('should delete a record', function(done) {
       var userData = { username: "chicken", email: "chicken@gmail.com" };
       request.post({
@@ -134,7 +174,6 @@ describe('Resource(basic)', function() {
       });
     });
   });
-
 
   describe('list', function() {
     beforeEach(function() {
