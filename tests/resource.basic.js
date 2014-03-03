@@ -96,7 +96,7 @@ describe('Resource(basic)', function() {
         expect(response.headers.location).is.not.empty;
 
         var path = response.headers.location;
-        request.post({ 
+        request.put({ 
           url: test.baseUrl + path,
           json: { email: 'emma@fmail.co.uk' }
         }, function(err, response, body) {
