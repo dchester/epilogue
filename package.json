@@ -5,8 +5,9 @@
   "author": "David Chester <dchester@shutterstock.com>",
   "main": "lib/",
   "scripts": {
-    "test": "npm run-script jshint && node_modules/nodeunit/bin/nodeunit tests",
-    "jshint": "jshint ./lib"
+    "jshint": "jshint ./lib",
+    "mocha": "mocha -R spec -u exports tests/resource.basic.js",
+    "test": "npm run-script jshint && npm run-script mocha"
   },
   "repository": {
     "type": "git",
@@ -18,9 +19,9 @@
     "request": "~2.34.0",
     "sequelize": "~2.0.0-dev10",
     "express": "~3.4.8",
-    "mocha": "~1.17.0",
-    "chai": "~1.9.0",
-    "jshint": "~2.4.2"
+    "mocha": ">=1.17.0",
+    "chai": ">= 1.9.0",
+    "jshint": ">=2.4.2"
   },
   "dependencies": {
     "async": "~0.2.10",
