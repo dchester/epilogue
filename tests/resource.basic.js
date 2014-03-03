@@ -10,7 +10,6 @@ var test = {};
 describe('Resource(basic)', function() {
   before(function() {
     test.db = new Sequelize('main', null, null, {
-      storage: "/tmp/epilogue-test.sqlite",
       dialect: 'sqlite',
       logging: false
     });
