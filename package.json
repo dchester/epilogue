@@ -5,7 +5,7 @@
   "author": "David Chester <dchester@shutterstock.com>",
   "main": "lib/",
   "scripts": {
-    "jshint": "jshint ./lib",
+    "jshint": "jshint ./lib ./tests",
     "mocha": "mocha -R spec -u exports tests/*.js",
     "test": "npm run-script jshint && npm run-script mocha"
   },

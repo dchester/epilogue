@@ -1,3 +1,5 @@
+"use strict";
+
 var express = require('express'),
     request = require('request'),
     http = require('http'),
@@ -14,10 +16,10 @@ describe('Resource(milestones)', function() {
       logging: false
     });
 
-    test.User = test.db.define('users', { 
-      id:       { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true }, 
-      username: { type: Sequelize.STRING, unique: true }, 
-      email:    { type: Sequelize.STRING, unique: true, validate: { isEmail: true } } 
+    test.User = test.db.define('users', {
+      id:       { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
+      username: { type: Sequelize.STRING, unique: true },
+      email:    { type: Sequelize.STRING, unique: true, validate: { isEmail: true } }
     }, {
       underscored: true,
       timestamps: false
@@ -30,7 +32,7 @@ describe('Resource(milestones)', function() {
       .success(function() {
         test.app = express();
         test.app.use(express.json());
-        test.app.use(express.urlencoded()); 
+        test.app.use(express.urlencoded());
 
         rest.initialize({ app: test.app });
         test.userResource = rest.resource({
@@ -99,7 +101,7 @@ describe('Resource(milestones)', function() {
         expect(err).to.be.null;
         expect(response.statusCode).to.equal(201);
 
-        var path = response.headers['location'];
+        var path = response.headers.location;
         request.get({ url: test.baseUrl + path }, function(err, response, body) {
           var record = _.isObject(body) ? body : JSON.parse(body);
           delete record.id;

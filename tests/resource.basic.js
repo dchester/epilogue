@@ -1,3 +1,5 @@
+"use strict";
+
 var express = require('express'),
     request = require('request'),
     http = require('http'),
@@ -14,10 +16,10 @@ describe('Resource(basic)', function() {
       logging: false
     });
 
-    test.User = test.db.define('users', { 
-      id:       { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true }, 
-      username: { type: Sequelize.STRING, unique: true }, 
-      email:    { type: Sequelize.STRING, unique: true, validate: { isEmail: true } } 
+    test.User = test.db.define('users', {
+      id:       { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
+      username: { type: Sequelize.STRING, unique: true },
+      email:    { type: Sequelize.STRING, unique: true, validate: { isEmail: true } }
     }, {
       underscored: true,
       timestamps: false
@@ -30,7 +32,7 @@ describe('Resource(basic)', function() {
       .success(function() {
         test.app = express();
         test.app.use(express.json());
-        test.app.use(express.urlencoded()); 
+        test.app.use(express.urlencoded());
 
         rest.initialize({ app: test.app });
         rest.resource({
@@ -84,12 +86,12 @@ describe('Resource(basic)', function() {
 
   describe('read', function() {
     it('should return 404 for invalid record', function(done) {
-        request.get({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
-          expect(response.statusCode).to.equal(404);
-          var record = _.isObject(body) ? body: JSON.parse(body);
-          expect(record).to.contain.keys('error');
-          done();
-        });
+      request.get({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
+        expect(response.statusCode).to.equal(404);
+        var record = _.isObject(body) ? body: JSON.parse(body);
+        expect(record).to.contain.keys('error');
+        done();
+      });
     });
 
     it('should read a record', function(done) {
@@ -116,12 +118,12 @@ describe('Resource(basic)', function() {
 
   describe('update', function() {
     it('should return 404 for invalid record', function(done) {
-        request.put({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
-          expect(response.statusCode).to.equal(404);
-          var record = _.isObject(body) ? body: JSON.parse(body);
-          expect(record).to.contain.keys('error');
-          done();
-        });
+      request.put({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
+        expect(response.statusCode).to.equal(404);
+        var record = _.isObject(body) ? body: JSON.parse(body);
+        expect(record).to.contain.keys('error');
+        done();
+      });
     });
 
     it('should update a record', function(done) {
@@ -134,7 +136,7 @@ describe('Resource(basic)', function() {
         expect(response.headers.location).is.not.empty;
 
         var path = response.headers.location;
-        request.put({ 
+        request.put({
           url: test.baseUrl + path,
           json: { email: 'emma@fmail.co.uk' }
         }, function(err, response, body) {
@@ -145,19 +147,19 @@ describe('Resource(basic)', function() {
           userData.email = 'emma@fmail.co.uk';
           expect(record).to.eql(userData);
           done();
-        }); 
+        });
       });
     });
   });
 
   describe('delete', function() {
     it('should return 404 for invalid record', function(done) {
-        request.del({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
-          expect(response.statusCode).to.equal(404);
-          var record = _.isObject(body) ? body: JSON.parse(body);
-          expect(record).to.contain.keys('error');
-          done();
-        });
+      request.del({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
+        expect(response.statusCode).to.equal(404);
+        var record = _.isObject(body) ? body: JSON.parse(body);
+        expect(record).to.contain.keys('error');
+        done();
+      });
     });
 
     it('should delete a record', function(done) {
@@ -211,7 +213,7 @@ describe('Resource(basic)', function() {
     it('should list all records', function(done) {
       request.get({ url: test.baseUrl + '/users' }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
-        var records = JSON.parse(body).map(function(r) { delete r.id; return r });
+        var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql(test.userlist);
         expect(response.headers['content-range']).to.equal('items 0-4/5');
         done();
@@ -221,7 +223,7 @@ describe('Resource(basic)', function() {
     it('should list some records using offset and count', function(done) {
       request.get({ url: test.baseUrl + '/users?offset=1&count=2' }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
-        var records = JSON.parse(body).map(function(r) { delete r.id; return r });
+        var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql(test.userlist.slice(1,3));
         expect(response.headers['content-range']).to.equal('items 1-2/5');
         done();

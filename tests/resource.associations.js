@@ -1,3 +1,5 @@
+"use strict";
+
 var express = require('express'),
     request = require('request'),
     http = require('http'),
@@ -15,17 +17,17 @@ describe('Resource(associations)', function() {
       logging: false
     });
 
-    test.User = test.db.define('users', { 
-      id:       { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true }, 
-      username: { type: Sequelize.STRING, unique: true }, 
-      email:    { type: Sequelize.STRING, unique: true, validate: { isEmail: true } } 
+    test.User = test.db.define('users', {
+      id:       { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
+      username: { type: Sequelize.STRING, unique: true },
+      email:    { type: Sequelize.STRING, unique: true, validate: { isEmail: true } }
     }, {
       underscored: true,
       timestamps: false
     });
 
-    test.Address = test.db.define('addresses', { 
-      id:             { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true }, 
+    test.Address = test.db.define('addresses', {
+      id:             { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
       street:         { type: Sequelize.STRING },
       state_province: { type: Sequelize.STRING },
       postal_code:    { type: Sequelize.STRING },
@@ -44,7 +46,7 @@ describe('Resource(associations)', function() {
       .success(function() {
         test.app = express();
         test.app.use(express.json());
-        test.app.use(express.urlencoded()); 
+        test.app.use(express.urlencoded());
 
         rest.initialize({ app: test.app });
         rest.resource({
@@ -127,23 +129,23 @@ describe('Resource(associations)', function() {
       var testData = [
         {
           user: { username: "sherlock", email: "sherlock@gmail.com" },
-          address: { street: '‎221B Baker Street', state_province: 'London, UK', postal_code: 'NW1', country_code: '44'}
+          address: { street: '221B Baker Street', state_province: 'London, UK', postal_code: 'NW1', country_code: '44'}
         },
         {
           user: { username: "barack", email: "barack@gmail.com" },
-          address: { street: '‎1600 Pennsylvania Ave', state_province: 'Washington, DC', postal_code: '20500', country_code: '001'}
+          address: { street: '1600 Pennsylvania Ave', state_province: 'Washington, DC', postal_code: '20500', country_code: '001'}
         },
         {
           user: { username: "tony", email: "tony@gmail.com" },
-          address: { street: '‎633 Stag Trail RD', state_province: 'Caldwell, NJ', postal_code: '07006', country_code: '001'}
+          address: { street: '633 Stag Trail RD', state_province: 'Caldwell, NJ', postal_code: '07006', country_code: '001'}
         },
         {
           user: { username: "eddie", email: "eddie@gmail.com" },
-          address: { street: '‎1313 Mockingbird Ln', state_province: 'Lincoln, CA', postal_code: '95648', country_code: '001'}  
+          address: { street: '1313 Mockingbird Ln', state_province: 'Lincoln, CA', postal_code: '95648', country_code: '001'}
         },
         {
           user: { username: "lucy", email: "lucy@gmail.com" },
-          address: { street: '‎623 East 68th Street', state_province: 'New York, NY', postal_code: '10065', country_code: '001'}
+          address: { street: '623 East 68th Street', state_province: 'New York, NY', postal_code: '10065', country_code: '001'}
         }
       ];
 
@@ -169,7 +171,7 @@ describe('Resource(associations)', function() {
             test.expectedResult.push(record);
             callback();
           });
-        }); 
+        });
       }, function(err) {
         expect(err).to.be.null;
         done();
