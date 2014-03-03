@@ -77,43 +77,45 @@ describe('Resource(associations)', function() {
 
   // TESTS
   describe('read', function() {
-    it('should include prefetched data for relations', function(done) {
+    beforeEach(function(done) {
       request.post({
         url: test.baseUrl + '/addresses',
-        json: { street: '‎221B Baker Street', state_province: 'London', postal_code: 'NW1', country_code: '44'}
+        json: { street: '221B Baker Street', state_province: 'London', postal_code: 'NW1', country_code: '44'}
       }, function(error, response, body) {
         expect(response.statusCode).to.equal(201);
         var address = body;
         
         request.post({
           url: test.baseUrl + '/users',
-          json: { username: 'arthur', email: 'arthur@gmail.com', address_id: address.id }
+          json: { username: 'sherlock', email: 'sherlock@holmes.com', address_id: address.id }
         }, function(error, response, body) {
           expect(response.statusCode).to.equal(201);
-
-          request.get({
-            url: test.baseUrl + '/users/' + body.id
-          }, function(error, response, body) {
-            expect(response.statusCode).to.equal(200);
-            var result = _.isObject(body) ? body : JSON.parse(body);            
-            var expected = {
-              id: result.id,
-              username: 'arthur',
-              email: 'arthur@gmail.com',
-              address_id: address.id,
-              address: {
-                id: address.id,
-                street: '‎221B Baker Street', 
-                state_province: 'London', 
-                postal_code: 'NW1', 
-                country_code: '44'
-              }
-            };
-
-            expect(result).to.eql(expected);
-            done();
-          });
+          done();
         });
+      });
+    });
+
+    it('should include prefetched data for relations', function(done) {
+      request.get({
+        url: test.baseUrl + '/users/1'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        var expected = {
+          id: 1,
+          username: 'sherlock',
+          email: 'sherlock@holmes.com',
+          address: {
+            id: 1,
+            street: '221B Baker Street',
+            state_province: 'London',
+            postal_code: 'NW1',
+            country_code: '44'
+          }
+        };
+
+        expect(result).to.eql(expected);
+        done();
       });
     });
 
@@ -152,8 +154,8 @@ describe('Resource(associations)', function() {
         }, function(error, response, body) {
           expect(response.statusCode).to.equal(201);
           var userData = info.user;
-          userData.address_id = body.id;
           var address = _.isObject(body) ? body : JSON.parse(body);
+          userData.address_id = address.id;
 
           request.post({
             url: test.baseUrl + '/users',
@@ -162,8 +164,8 @@ describe('Resource(associations)', function() {
             expect(response.statusCode).to.equal(201);
 
             var record = body;
-            record.address_id = address.id;
             record.address = address;
+            delete record.address_id;
             test.expectedResult.push(record);
             callback();
           });
