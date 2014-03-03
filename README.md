@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/mbroadst/epilogue.png?branch=master)](https://travis-ci.org/mbroadst/epilogue)
+
 # Epilogue
 
 Create flexible REST endpoints and controllers from Sequelize models in your Express app in Node.
