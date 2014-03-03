@@ -75,6 +75,15 @@ describe('Resource(basic)', function() {
   });
 
   describe('read', function() {
+    it('should return 404 for invalid record', function(done) {
+        request.get({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
+          expect(response.statusCode).to.equal(404);
+          var record = _.isObject(body) ? body: JSON.parse(body);
+          expect(record).to.contain.keys('error');
+          done();
+        });
+    });
+
     it('should read a record', function(done) {
       var userData = { username: 'jamez', email: 'jamez@gmail.com' };
       request.post({
@@ -95,16 +104,6 @@ describe('Resource(basic)', function() {
         });
       });
     });
-
-    it('should return 404 for invalid record', function(done) {
-        request.get({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
-          expect(response.statusCode).to.equal(404);
-          var record = _.isObject(body) ? body: JSON.parse(body);
-          expect(record).to.contain.keys('error');
-          done();
-        });
-    });
-
   });
 
   describe('update', function() {

@@ -6,7 +6,7 @@
   "main": "lib/",
   "scripts": {
     "jshint": "jshint ./lib",
-    "mocha": "mocha -R spec -u exports tests/resource.basic.js",
+    "mocha": "mocha -R spec -u exports tests/*.js",
     "test": "npm run-script jshint && npm run-script mocha"
   },
   "repository": {
