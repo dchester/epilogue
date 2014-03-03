@@ -6,16 +6,10 @@ var express = require('express'),
     _ = require('lodash'),
     rest = require('../lib'),
     db = require('./lib/db'),
-    User = require('./lib/user'),
-    Address = require('./lib/address');
+    User = require('./lib/user');
 
 var test = {};
 describe('Resource(basic)', function() {
-  before(function(done) {
-    User.hasMany(Address);
-    done();
-  });
-
   beforeEach(function(done) {
     db
       .sync({ force: true })
