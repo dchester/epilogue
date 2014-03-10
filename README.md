@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/mbroadst/epilogue.png?branch=master)](https://travis-ci.org/mbroadst/epilogue)
+[![Build Status](https://travis-ci.org/dchester/epilogue.png?branch=master)](https://travis-ci.org/dchester/epilogue)
 
 # Epilogue
 
