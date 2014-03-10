@@ -16,7 +16,7 @@
   "devDependencies": {
     "sqlite3": "~2.2.0",
     "request": "~2.34.0",
-    "sequelize": "~2.0.0-dev10",
+    "sequelize": ">= 1.7.0",
     "express": "~3.4.8",
     "mocha": ">=1.17.0",
     "chai": ">= 1.9.0",
