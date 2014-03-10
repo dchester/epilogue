@@ -2,7 +2,7 @@
 
 # Epilogue
 
-Create flexible REST endpoints and controllers from Sequelize models in your Express app in Node.
+Create flexible REST endpoints and controllers from [Sequelize](http://www.sequelizejs.com/) models in your [Express](http://expressjs.com/) app in Node.
 
 ### Start with a model
 
