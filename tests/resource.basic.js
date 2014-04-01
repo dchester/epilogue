@@ -34,7 +34,10 @@ describe('Resource(basic)', function() {
         test.app.use(express.json());
         test.app.use(express.urlencoded());
 
-        rest.initialize({ app: test.app });
+        rest.initialize({
+          app: test.app,
+          sequelize: Sequelize
+        });
         rest.resource({
           model: test.User,
           endpoints: ['/users', '/users/:id']
@@ -226,6 +229,25 @@ describe('Resource(basic)', function() {
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql(test.userlist.slice(1,3));
         expect(response.headers['content-range']).to.equal('items 1-2/5');
+        done();
+      });
+    });
+
+    it('should support a generic query string', function(done) {
+      request.get({ url: test.baseUrl + '/users?q=ll' }, function(err, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
+        expect(records).to.eql([{ username: "william", email: "william@gmail.com" }]);
+        done();
+      });
+    });
+
+    it('should support a generic query string as well as other criteria', function(done) {
+      request.get({ url: test.baseUrl + '/users?q=gmail&offset=1&count=2' }, function(err, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
+        expect(records).to.eql([{ username: "james", email: "james@gmail.com" },
+                                { username: "henry", email: "henry@gmail.com" }]);
         done();
       });
     });

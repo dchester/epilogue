@@ -48,7 +48,10 @@ describe('Resource(associations)', function() {
         test.app.use(express.json());
         test.app.use(express.urlencoded());
 
-        rest.initialize({ app: test.app });
+        rest.initialize({
+          app: test.app,
+          sequelize: Sequelize
+        });
         rest.resource({
           model: test.User,
           include: [test.Address],
