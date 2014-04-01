@@ -7,7 +7,8 @@
   "scripts": {
     "jshint": "jshint ./lib ./tests",
     "mocha": "mocha --check-leaks -R spec -u exports tests/*.js",
-    "test": "npm run-script jshint && npm run-script mocha"
+    "coverage": "istanbul cover node_modules/.bin/_mocha -- -- tests/*.js",
+    "test": "npm run-script jshint && npm run-script mocha && npm run-script istanbul"
   },
   "repository": {
     "type": "git",
@@ -20,7 +21,8 @@
     "express": ">=3.0.0",
     "mocha": ">=1.17.0",
     "chai": ">= 1.9.0",
-    "jshint": ">=2.4.2"
+    "jshint": ">=2.4.2",
+    "istanbul": "~0.1.45"
   },
   "dependencies": {
     "async": "~0.2.10",
