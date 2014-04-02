@@ -18,7 +18,11 @@ Load up `epilogue` and provide a reference to your Express app.  Then create res
 
 ```javascript
 var rest = require('epilogue');
-rest.initialize({ app: app });
+
+rest.initialize({
+    app: app,
+    sequelize: sequelize
+});
 
 var users = rest.resource({
     model: User,
