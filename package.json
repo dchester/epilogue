@@ -16,11 +16,11 @@
   "devDependencies": {
     "sqlite3": "~2.2.0",
     "request": "~2.34.0",
-    "sequelize": ">=1.7.0",
     "express": ">=3.0.0",
     "mocha": ">=1.17.0",
     "chai": ">= 1.9.0",
-    "jshint": ">=2.4.2"
+    "jshint": ">=2.4.2",
+    "sequelize": "~1.7.0-rc6"
   },
   "dependencies": {
     "async": "~0.2.10",

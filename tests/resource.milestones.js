@@ -34,7 +34,10 @@ describe('Resource(milestones)', function() {
         test.app.use(express.json());
         test.app.use(express.urlencoded());
 
-        rest.initialize({ app: test.app });
+        rest.initialize({
+          app: test.app,
+          sequelize: Sequelize
+        });
         test.userResource = rest.resource({
           model: test.User,
           endpoints: ['/users', '/users/:id']
