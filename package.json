@@ -6,8 +6,9 @@
   "main": "lib/",
   "scripts": {
     "jshint": "jshint ./lib ./tests",
-    "mocha": "mocha -R spec -u exports tests/*.js",
-    "test": "npm run-script jshint && npm run-script mocha"
+    "mocha": "mocha --check-leaks -R spec -u exports tests/*.js",
+    "coverage": "istanbul cover node_modules/.bin/_mocha -- -- tests/*.js",
+    "test": "npm run-script jshint && npm run-script mocha && npm run-script istanbul"
   },
   "repository": {
     "type": "git",
@@ -20,7 +21,8 @@
     "mocha": ">=1.17.0",
     "chai": ">= 1.9.0",
     "jshint": ">=2.4.2",
-    "sequelize": "~1.7.0-rc6"
+    "sequelize": "~1.7.0-rc6",
+    "istanbul": "~0.1.45"
   },
   "dependencies": {
     "async": "~0.2.10",

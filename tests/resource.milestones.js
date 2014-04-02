@@ -87,10 +87,14 @@ describe('Resource(milestones)', function() {
 
   });
 
+  describe('auth', function() {
+    // Authorize the request. Defaults to passthrough.
+  });
+
   describe('fetch', function() {
     // Fetch data from the database for non-create actions according to context.criteria, writing to context.instance.
     
-    it('should support overriding data for create', function(done) {
+    it('should support overriding data for create before fetch', function(done) {
       var mockData = { username: 'mocked', email: 'mocked@gmail.com' };
       test.userResource.read.fetch.before(function(req, res, context) {
         context.instance = mockData;
@@ -115,6 +119,30 @@ describe('Resource(milestones)', function() {
       });
     });
 
+    it('should support modifying data for create after fetch', function(done) {
+      var expected = { username: 'jamez', email: 'injected@email.com' };
+      test.userResource.read.fetch.after(function(req, res, context) {
+        context.instance.email = 'injected@email.com';
+        return context.skip();
+      });
+
+      request.post({
+        url: test.baseUrl + '/users',
+        json: { username: 'jamez', email: 'jamez@gmail.com' }
+      }, function(err, response, body) {
+        expect(err).to.be.null;
+        expect(response.statusCode).to.equal(201);
+
+        var path = response.headers.location;
+        request.get({ url: test.baseUrl + path }, function(err, response, body) {
+          var record = _.isObject(body) ? body : JSON.parse(body);
+          delete record.id;
+          expect(response.statusCode).to.equal(200);
+          expect(record).to.eql(expected);
+          done();
+        });
+      });
+    });
   });
 
   describe('data', function() {

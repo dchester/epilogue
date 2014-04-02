@@ -62,6 +62,23 @@ describe('Resource(basic)', function() {
   });
 
   // TESTS
+  describe('construction', function() {
+    it('should throw an exception if called with an invalid model', function(done) {
+      expect(rest.resource).to.throw('please specify a valid model');
+      done();
+    });
+
+    it('should throw an exception if created with an invalid model', function(done) {
+      try {
+        var resource = new rest.Resource();
+      } catch (exception) {
+        expect(exception).to.eql(new Error('resource needs a model'));
+      }
+
+      done();
+    });
+  });
+
   describe('create', function() {
     it('should create a record', function(done) {
       request.post({
