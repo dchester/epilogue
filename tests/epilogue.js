@@ -13,6 +13,7 @@ describe('Epilogue', function() {
   it('should throw an exception with an invalid updateMethod', function(done) {
     expect(epilogue.initialize.bind(epilogue, {
       app: {},
+      sequelize: {},
       updateMethod: "dogs"
     })).to.throw('updateMethod must be one of PUT, POST, or PATCH');
     done();

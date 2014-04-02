@@ -56,6 +56,7 @@ describe('Resource(updateMethod)', function() {
     it('should allow for PATCH as an update method', function(done) {
       rest.initialize({
         app: test.app,
+        sequelize: Sequelize,
         updateMethod: 'patch',
       });
 
@@ -89,9 +90,10 @@ describe('Resource(updateMethod)', function() {
   });
 
   describe('put', function() {
-    it('should allow for PATCH as an update method', function(done) {
+    it('should allow for PUT as an update method', function(done) {
       rest.initialize({
         app: test.app,
+        sequelize: Sequelize,
         updateMethod: 'put',
       });
       
@@ -125,9 +127,10 @@ describe('Resource(updateMethod)', function() {
   });
 
   describe('post', function() {
-    it('should allow for PATCH as an update method', function(done) {
+    it('should allow for POST as an update method', function(done) {
       rest.initialize({
         app: test.app,
+        sequelize: Sequelize,
         updateMethod: 'post',
       });
       
