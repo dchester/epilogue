@@ -254,6 +254,7 @@ describe('Resource(basic)', function() {
       request.get({ url: test.baseUrl + '/users?q=ll' }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
+        expect(response.headers['content-range']).to.equal('items 0-0/1');
         expect(records).to.eql([{ username: "william", email: "william@gmail.com" }]);
         done();
       });
@@ -263,8 +264,19 @@ describe('Resource(basic)', function() {
       request.get({ url: test.baseUrl + '/users?q=gmail&offset=1&count=2' }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
+        expect(response.headers['content-range']).to.equal('items 1-2/5');
         expect(records).to.eql([{ username: "james", email: "james@gmail.com" },
                                 { username: "henry", email: "henry@gmail.com" }]);
+        done();
+      });
+    });
+
+    it('should return a valid content-range with no results for a query', function(done) {
+      request.get({ url: test.baseUrl + '/users?q=zzzz' }, function(err, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
+        expect(records).to.eql([]);
+        expect(response.headers['content-range']).to.equal('items 0-0/0');
         done();
       });
     });
