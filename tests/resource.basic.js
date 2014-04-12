@@ -2,6 +2,7 @@
 
 var express = require('express'),
     request = require('request'),
+    async = require('async'),
     http = require('http'),
     expect = require('chai').expect,
     Sequelize = require('sequelize'),
@@ -18,7 +19,7 @@ describe('Resource(basic)', function() {
 
     test.User = test.db.define('users', {
       id:       { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
-      username: { type: Sequelize.STRING, unique: true },
+      username: { type: Sequelize.STRING },
       email:    { type: Sequelize.STRING, unique: true, validate: { isEmail: true } }
     }, {
       underscored: true,
@@ -205,16 +206,17 @@ describe('Resource(basic)', function() {
   });
 
   describe('list', function() {
-    beforeEach(function() {
+    beforeEach(function(done) {
       test.userlist = [
         { username: "arthur", email: "arthur@gmail.com" },
         { username: "james", email: "james@gmail.com" },
         { username: "henry", email: "henry@gmail.com" },
         { username: "william", email: "william@gmail.com" },
-        { username: "edward", email: "edward@gmail.com" }
+        { username: "edward", email: "edward@gmail.com" },
+        { username: "arthur", email: "aaaaarthur@gmail.com" }
       ];
 
-      _(test.userlist).forEach(function(data) {
+      async.each(test.userlist, function(data, callback) {
         request.post({
           url: test.baseUrl + '/users',
           json: data
@@ -222,8 +224,9 @@ describe('Resource(basic)', function() {
           expect(response).to.not.be.null;
           expect(response.statusCode).to.equal(201);
           expect(response.headers.location).to.match(/\/users\/\d+/);
+          callback();
         });
-      });
+      }, done);
     });
 
     afterEach(function() {
@@ -235,7 +238,7 @@ describe('Resource(basic)', function() {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql(test.userlist);
-        expect(response.headers['content-range']).to.equal('items 0-4/5');
+        expect(response.headers['content-range']).to.equal('items 0-5/6');
         done();
       });
     });
@@ -245,7 +248,7 @@ describe('Resource(basic)', function() {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql(test.userlist.slice(1,3));
-        expect(response.headers['content-range']).to.equal('items 1-2/5');
+        expect(response.headers['content-range']).to.equal('items 1-2/6');
         done();
       });
     });
@@ -264,7 +267,7 @@ describe('Resource(basic)', function() {
       request.get({ url: test.baseUrl + '/users?q=gmail&offset=1&count=2' }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
-        expect(response.headers['content-range']).to.equal('items 1-2/5');
+        expect(response.headers['content-range']).to.equal('items 1-2/6');
         expect(records).to.eql([{ username: "james", email: "james@gmail.com" },
                                 { username: "henry", email: "henry@gmail.com" }]);
         done();
@@ -277,6 +280,77 @@ describe('Resource(basic)', function() {
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql([]);
         expect(response.headers['content-range']).to.equal('items 0-0/0');
+        done();
+      });
+    });
+
+    it('should sort by a single field ascending', function(done) {
+      request.get({ url: test.baseUrl + '/users?sort=username' }, function(err, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
+        expect(records).to.eql([
+          { username: "arthur", email: "arthur@gmail.com" },
+          { username: "arthur", email: "aaaaarthur@gmail.com" },
+          { username: "edward", email: "edward@gmail.com" },
+          { username: "henry", email: "henry@gmail.com" },
+          { username: "james", email: "james@gmail.com" },
+          { username: "william", email: "william@gmail.com" }
+        ]);
+        done();
+      });
+    });
+
+    it('should sort by a single field descending', function(done) {
+      request.get({ url: test.baseUrl + '/users?sort=-username' }, function(err, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
+        expect(records).to.eql([
+          { username: "william", email: "william@gmail.com" },
+          { username: "james", email: "james@gmail.com" },
+          { username: "henry", email: "henry@gmail.com" },
+          { username: "edward", email: "edward@gmail.com" },
+          { username: "arthur", email: "arthur@gmail.com" },
+          { username: "arthur", email: "aaaaarthur@gmail.com" }
+        ]);
+        done();
+      });
+    });
+
+    it('should sort by multiple fields', function(done) {
+      request.get({ url: test.baseUrl + '/users?sort=username,email' }, function(err, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
+        expect(records).to.eql([
+          { username: "arthur", email: "aaaaarthur@gmail.com" },
+          { username: "arthur", email: "arthur@gmail.com" },
+          { username: "edward", email: "edward@gmail.com" },
+          { username: "henry", email: "henry@gmail.com" },
+          { username: "james", email: "james@gmail.com" },
+          { username: "william", email: "william@gmail.com" }
+        ]);
+        done();
+      });
+    });
+
+    it('should sort by multiple fields ascending/descending', function(done) {
+      request.get({ url: test.baseUrl + '/users?sort=username,-email' }, function(err, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
+        expect(records).to.eql([
+          { username: "arthur", email: "arthur@gmail.com" },
+          { username: "arthur", email: "aaaaarthur@gmail.com" },
+          { username: "edward", email: "edward@gmail.com" },
+          { username: "henry", email: "henry@gmail.com" },
+          { username: "james", email: "james@gmail.com" },
+          { username: "william", email: "william@gmail.com" }
+        ]);
+        done();
+      });
+    });
+
+    it('should fail with invalid sort criteria', function(done) {
+      request.get({ url: test.baseUrl + '/users?sort=dogs' }, function(err, response, body) {
+        expect(response.statusCode).to.equal(500);
         done();
       });
     });
