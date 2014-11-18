@@ -155,6 +155,76 @@ describe('Resource(milestones)', function() {
 
   describe('send', function() {
     // Send the HTTP response, headers along with the data in context.instance.
+
+    it('should support modifying error data on create before sending response', function(done) {
+      var expected = { error: 'Injected error message' };
+      test.userResource.create.send.before(function(req, res, context) {
+        if (context.error !== undefined) {
+          context.error = expected;
+        }
+        context.continue();
+      });
+
+      request.post({
+        url: test.baseUrl + '/users',
+        json: { username: 'jamez', email: 'not an email address' }
+      }, function(err, response, body) {
+        expect(err).to.be.null;
+        expect(response.statusCode).to.equal(400);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result).to.eql(expected);
+        done();
+      });
+    });
+
+    it('should support modifying error data on update before sending response', function(done) {
+      var expected = { error: 'Injected error message' };
+      test.userResource.update.send.before(function(req, res, context) {
+        if (context.error !== undefined) {
+          context.error = expected;
+        }
+        context.continue();
+      });
+
+      request.post({
+        url: test.baseUrl + '/users',
+        json: { username: 'jamez', email: 'jamez@gmail.com' }
+      }, function(err, response, body) {
+        expect(err).to.be.null;
+        expect(response.statusCode).to.equal(201);
+
+        var path = response.headers.location;
+        request.put({
+          url: test.baseUrl + path,
+          json: { email: 'not an email address' }
+        }, function(err, response, body) {
+          expect(err).to.be.null;
+          expect(response.statusCode).to.equal(400);
+          var result = _.isObject(body) ? body : JSON.parse(body);
+          expect(result).to.eql(expected);
+          done();
+        });
+      });
+    });
+
+    it('should support modifying error data on delete before sending response', function(done) {
+      var expected = { error: 'Injected error message' };
+      test.userResource.delete.send.before(function(req, res, context) {
+        if (context.error !== undefined) {
+          context.error = expected;
+        }
+        context.continue();
+      });
+
+      request.del({
+        url: test.baseUrl + '/users/-1'
+      }, function(err, response, body) {
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(response.statusCode).to.equal(404);
+        expect(result).to.eql(expected);
+        done();
+      });
+    });
   });
 
   describe('complete', function() {
