@@ -1,6 +1,7 @@
 "use strict";
 
 var express = require('express'),
+    restify = require('restify'),
     request = require('request'),
     http = require('http'),
     expect = require('chai').expect,
@@ -30,11 +31,18 @@ describe('Resource(updateMethod)', function() {
     test.db
       .sync({ force: true })
       .success(function() {
-        test.app = express();
-        test.app.use(express.json());
-        test.app.use(express.urlencoded());
-        test.server = http.createServer(test.app);
-        test.server.listen(48281, null, null, function() {
+        if (process.env.USE_RESTIFY) {
+          test.server = test.app = restify.createServer();
+          test.server.use(restify.queryParser());
+          test.server.use(restify.bodyParser());
+        } else {
+          test.app = express();
+          test.app.use(express.json());
+          test.app.use(express.urlencoded());
+          test.server = http.createServer(test.app);
+        }
+
+        test.server.listen(48281, function() {
           test.baseUrl =
             'http://' + test.server.address().address + ':' + test.server.address().port;
           done();
@@ -96,7 +104,7 @@ describe('Resource(updateMethod)', function() {
         sequelize: Sequelize,
         updateMethod: 'put',
       });
-      
+
       rest.resource({
         model: test.User,
         endpoints: ['/users', '/users/:id']
@@ -133,7 +141,7 @@ describe('Resource(updateMethod)', function() {
         sequelize: Sequelize,
         updateMethod: 'post',
       });
-      
+
       rest.resource({
         model: test.User,
         endpoints: ['/users', '/users/:id']

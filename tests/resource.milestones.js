@@ -1,6 +1,7 @@
 "use strict";
 
 var express = require('express'),
+    restify = require('restify'),
     request = require('request'),
     http = require('http'),
     expect = require('chai').expect,
@@ -30,9 +31,16 @@ describe('Resource(milestones)', function() {
     test.db
       .sync({ force: true })
       .success(function() {
-        test.app = express();
-        test.app.use(express.json());
-        test.app.use(express.urlencoded());
+        if (process.env.USE_RESTIFY) {
+          test.server = test.app = restify.createServer();
+          test.server.use(restify.queryParser());
+          test.server.use(restify.bodyParser());
+        } else {
+          test.app = express();
+          test.app.use(express.json());
+          test.app.use(express.urlencoded());
+          test.server = http.createServer(test.app);
+        }
 
         rest.initialize({
           app: test.app,
@@ -43,8 +51,7 @@ describe('Resource(milestones)', function() {
           endpoints: ['/users', '/users/:id']
         });
 
-        test.server = http.createServer(test.app);
-        test.server.listen(48281, null, null, function() {
+        test.server.listen(48281, function() {
           test.baseUrl =
             'http://' + test.server.address().address + ':' + test.server.address().port;
           done();
@@ -93,7 +100,7 @@ describe('Resource(milestones)', function() {
 
   describe('fetch', function() {
     // Fetch data from the database for non-create actions according to context.criteria, writing to context.instance.
-    
+
     it('should support overriding data for create before fetch', function(done) {
       var mockData = { username: 'mocked', email: 'mocked@gmail.com' };
       test.userResource.read.fetch.before(function(req, res, context) {

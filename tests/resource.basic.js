@@ -1,6 +1,7 @@
 "use strict";
 
 var express = require('express'),
+    restify = require('restify'),
     request = require('request'),
     async = require('async'),
     http = require('http'),
@@ -31,9 +32,16 @@ describe('Resource(basic)', function() {
     test.db
       .sync({ force: true })
       .success(function() {
-        test.app = express();
-        test.app.use(express.json());
-        test.app.use(express.urlencoded());
+        if (process.env.USE_RESTIFY) {
+          test.server = test.app = restify.createServer();
+          test.server.use(restify.queryParser());
+          test.server.use(restify.bodyParser());
+        } else {
+          test.app = express();
+          test.app.use(express.json());
+          test.app.use(express.urlencoded());
+          test.server = http.createServer(test.app);
+        }
 
         rest.initialize({
           app: test.app,
@@ -44,8 +52,7 @@ describe('Resource(basic)', function() {
           endpoints: ['/users', '/users/:id']
         });
 
-        test.server = http.createServer(test.app);
-        test.server.listen(48281, null, null, function() {
+        test.server.listen(48281, function() {
           test.baseUrl =
             'http://' + test.server.address().address + ':' + test.server.address().port;
           done();
