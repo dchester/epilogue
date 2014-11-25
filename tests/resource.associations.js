@@ -1,6 +1,7 @@
 "use strict";
 
 var express = require('express'),
+    restify = require('restify'),
     request = require('request'),
     http = require('http'),
     expect = require('chai').expect,
@@ -44,9 +45,16 @@ describe('Resource(associations)', function() {
     test.db
       .sync({ force: true })
       .success(function() {
-        test.app = express();
-        test.app.use(express.json());
-        test.app.use(express.urlencoded());
+        if (process.env.USE_RESTIFY) {
+          test.server = test.app = restify.createServer();
+          test.server.use(restify.queryParser());
+          test.server.use(restify.bodyParser());
+        } else {
+          test.app = express();
+          test.app.use(express.json());
+          test.app.use(express.urlencoded());
+          test.server = http.createServer(test.app);
+        }
 
         rest.initialize({
           app: test.app,
@@ -62,8 +70,7 @@ describe('Resource(associations)', function() {
           endpoints: ['/addresses', '/addresses/:id']
         });
 
-        test.server = http.createServer(test.app);
-        test.server.listen(48281, null, null, function() {
+        test.server.listen(48281, function() {
           test.baseUrl =
             'http://' + test.server.address().address + ':' + test.server.address().port;
           done();
@@ -89,7 +96,7 @@ describe('Resource(associations)', function() {
       }, function(error, response, body) {
         expect(response.statusCode).to.equal(201);
         var address = body;
-        
+
         request.post({
           url: test.baseUrl + '/users',
           json: { username: 'sherlock', email: 'sherlock@holmes.com', address_id: address.id }
