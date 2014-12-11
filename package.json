@@ -6,9 +6,9 @@
   "main": "lib/",
   "scripts": {
     "jshint": "jshint ./lib ./tests",
-    "mocha": "mocha --check-leaks -R spec -u exports tests/*.js",
-    "coverage": "istanbul cover node_modules/.bin/_mocha -- -- tests/*.js",
-    "test": "npm run-script jshint && npm run-script mocha && npm run-script istanbul"
+    "mocha": "mocha --check-leaks -R spec -u exports tests/*.test.js tests/**/*.test.js",
+    "coverage": "istanbul cover node_modules/.bin/_mocha -- -- tests/*.test.js tests/**/*.test.js",
+    "test": "npm run-script jshint && npm run-script mocha"
   },
   "repository": {
     "type": "git",

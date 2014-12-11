@@ -8,7 +8,7 @@ var express = require('express'),
     Sequelize = require('sequelize'),
     _ = require('lodash'),
     async = require('async'),
-    rest = require('../lib');
+    rest = require('../../lib');
 
 var test = {};
 describe('Resource(associations)', function() {

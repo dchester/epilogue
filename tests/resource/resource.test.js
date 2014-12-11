@@ -8,7 +8,7 @@ var express = require('express'),
     expect = require('chai').expect,
     Sequelize = require('sequelize'),
     _ = require('lodash'),
-    rest = require('../lib');
+    rest = require('../../lib');
 
 var test = {};
 describe('Resource(basic)', function() {

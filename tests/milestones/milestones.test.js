@@ -7,10 +7,10 @@ var express = require('express'),
     expect = require('chai').expect,
     Sequelize = require('sequelize'),
     _ = require('lodash'),
-    rest = require('../lib');
+    rest = require('../../lib');
 
 var test = {};
-describe('Resource(milestones)', function() {
+describe('Milestones', function() {
   before(function() {
     test.db = new Sequelize('main', null, null, {
       dialect: 'sqlite',
