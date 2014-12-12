@@ -1,0 +1,36 @@
+'use strict';
+
+var TestMiddlewareBeforeAfter = {
+  results: {}
+};
+
+var actions = ['create', 'list', 'read', 'update', 'delete'],
+    milestones = ['start', 'auth', 'fetch', 'data', 'write', 'send', 'complete'];
+
+actions.forEach(function(action) {
+  TestMiddlewareBeforeAfter.results[action] = {};
+  TestMiddlewareBeforeAfter[action] = {};
+  milestones.forEach(function(milestone) {
+    TestMiddlewareBeforeAfter.results[action][milestone] = {};
+    TestMiddlewareBeforeAfter.results[action][milestone].action = false;
+    TestMiddlewareBeforeAfter.results[action][milestone].before = false;
+    TestMiddlewareBeforeAfter.results[action][milestone].after = false;
+
+    TestMiddlewareBeforeAfter[action][milestone] = {
+      before: function(req, res, context) {
+        TestMiddlewareBeforeAfter.results[action][milestone].before = true;
+        context.continue();
+      },
+      action: function(req, res, context) {
+        TestMiddlewareBeforeAfter.results[action][milestone].action = true;
+        context.continue();
+      },
+      after: function(req, res, context) {
+        TestMiddlewareBeforeAfter.results[action][milestone].after = true;
+        context.continue();
+      }
+    };
+  });
+});
+
+module.exports = TestMiddlewareBeforeAfter;

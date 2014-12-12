@@ -73,6 +73,52 @@ users.list.fetch.before(function(req, res, context) {
 })
 ```
 
+Milestones can also be defined in a declarative fashion, and used as middleware with any resource. For example:
+
+```javascript
+// my-middleware.js
+module.exports = {
+  create: {
+    fetch: function(req, res, context) {
+      // manipulate the fetch call
+      context.continue();
+    }
+  },
+  list: {
+    write: {
+      before: function(req, res, context) {
+        // modify data before writing list data
+        context.continue();
+      },
+      action: function(req, res, context) {
+        // change behavior of actually writing the data
+        context.continue();
+      },
+      after: function(req, res, context) {
+        // set some sort of flag after writing list data
+        context.continue();
+      }
+    }
+  }
+}
+
+// my-app.js
+var rest = require('epilogue'),
+    restMiddleware = require('my-middleware');
+
+rest.initialize({
+    app: app,
+    sequelize: sequelize
+});
+
+var users = rest.resource({
+    model: User,
+    endpoints: ['/users', '/users/:id']
+});
+
+users.use(restMiddleware);
+```
+
 ### Pagination
 
 List routes support pagination via `offset` or `page` and `count` query parameters.  Find metadata about pagination and number of results in the `Content-Range` response header.
@@ -93,7 +139,7 @@ Content-Range: items 200-299/3230
 ## Epilogue API
 
 #### initialize()
- 
+
 Set defaults and give epilouge a reference to your express app.  Send the following parameters:
 
 > ###### app
@@ -113,13 +159,13 @@ Set defaults and give epilouge a reference to your express app.  Send the follow
 Create a resource and CRUD actions given a Sequelize model and endpoints.  Accepts these parameters:
 
 > ###### model
-> 
+>
 > Reference to a Sequelize model
-> 
+>
 > ###### endpoints
 >
 > Specify endpoints as an array with two sinatra-style URL paths in plural and singular form (e.g., `['/users', '/users/:id']`).
-> 
+>
 > ###### actions
 >
 > Create only the specified list of actions for the resource.  Options include `create`, `list`, `read`, `update`, and `delete`.  Defaults to all.
