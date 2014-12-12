@@ -1,26 +1,17 @@
-"use strict";
+'use strict';
 
-var express = require('express'),
-    restify = require('restify'),
-    request = require('request'),
-    http = require('http'),
+var request = require('request'),
     expect = require('chai').expect,
-    Sequelize = require('sequelize'),
     _ = require('lodash'),
-    rest = require('../../lib');
+    rest = require('../../lib'),
+    test = require('../support');
 
-var test = {};
 describe('Resource(updateMethod)', function() {
   before(function() {
-    test.db = new Sequelize('main', null, null, {
-      dialect: 'sqlite',
-      logging: false
-    });
-
-    test.User = test.db.define('users', {
-      id:       { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
-      username: { type: Sequelize.STRING, unique: true },
-      email:    { type: Sequelize.STRING, unique: true, validate: { isEmail: true } }
+    test.models.User = test.db.define('users', {
+      id:       { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
+      username: { type: test.Sequelize.STRING, unique: true },
+      email:    { type: test.Sequelize.STRING, unique: true, validate: { isEmail: true } }
     }, {
       underscored: true,
       timestamps: false
@@ -28,35 +19,15 @@ describe('Resource(updateMethod)', function() {
   });
 
   beforeEach(function(done) {
-    test.db
-      .sync({ force: true })
-      .success(function() {
-        if (process.env.USE_RESTIFY) {
-          test.server = test.app = restify.createServer();
-          test.server.use(restify.queryParser());
-          test.server.use(restify.bodyParser());
-        } else {
-          test.app = express();
-          test.app.use(express.json());
-          test.app.use(express.urlencoded());
-          test.server = http.createServer(test.app);
-        }
-
-        test.server.listen(48281, function() {
-          test.baseUrl =
-            'http://' + test.server.address().address + ':' + test.server.address().port;
-          done();
-        });
-      });
+    test.initializeDatabase(function() {
+      test.initializeServer(done);
+    });
   });
 
   afterEach(function(done) {
-    test.db
-      .getQueryInterface()
-      .dropAllTables()
-      .success(function() {
-        test.server.close(done);
-      });
+    test.clearDatabase(function() {
+      test.server.close(done);
+    });
   });
 
   // TESTS
@@ -64,12 +35,12 @@ describe('Resource(updateMethod)', function() {
     it('should allow for PATCH as an update method', function(done) {
       rest.initialize({
         app: test.app,
-        sequelize: Sequelize,
+        sequelize: test.Sequelize,
         updateMethod: 'patch',
       });
 
       rest.resource({
-        model: test.User,
+        model: test.models.User,
         endpoints: ['/users', '/users/:id']
       });
 
@@ -101,12 +72,12 @@ describe('Resource(updateMethod)', function() {
     it('should allow for PUT as an update method', function(done) {
       rest.initialize({
         app: test.app,
-        sequelize: Sequelize,
+        sequelize: test.Sequelize,
         updateMethod: 'put',
       });
 
       rest.resource({
-        model: test.User,
+        model: test.models.User,
         endpoints: ['/users', '/users/:id']
       });
 
@@ -138,12 +109,12 @@ describe('Resource(updateMethod)', function() {
     it('should allow for POST as an update method', function(done) {
       rest.initialize({
         app: test.app,
-        sequelize: Sequelize,
+        sequelize: test.Sequelize,
         updateMethod: 'post',
       });
 
       rest.resource({
-        model: test.User,
+        model: test.models.User,
         endpoints: ['/users', '/users/:id']
       });
 
