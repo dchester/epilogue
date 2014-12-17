@@ -45,6 +45,7 @@
     "chai": ">= 1.9.0",
     "jshint": ">=2.4.2",
     "sequelize": "~1.7.0-rc6",
-    "istanbul": "~0.1.45"
+    "istanbul": "~0.1.45",
+    "codeclimate-test-reporter": "~0.0.4"
   }
 }

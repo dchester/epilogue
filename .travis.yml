@@ -8,6 +8,14 @@ cache:
 node_js:
   - 0.10
 
+addons:
+  code_climate:
+    repo_token: 9404e8c7d4b3fca08c4ab3977aba0840d1fc3ad0700551f94e866059ee968c64
+
 env:
   -
   - USE_RESTIFY=1
+
+after_script:
+  - npm run-script coverage
+  - cat coverage/lcov.info | codeclimate
