@@ -10,9 +10,9 @@ var request = require('request'),
 describe('Resource(basic)', function() {
   before(function() {
     test.models.User = test.db.define('users', {
-      id:       { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
+      id: { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
       username: { type: test.Sequelize.STRING },
-      email:    { type: test.Sequelize.STRING, unique: true, validate: { isEmail: true } }
+      email: { type: test.Sequelize.STRING, unique: true, validate: { isEmail: true } }
     }, {
       underscored: true,
       timestamps: false
@@ -90,7 +90,7 @@ describe('Resource(basic)', function() {
     it('should return 404 for invalid record', function(done) {
       request.get({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
         expect(response.statusCode).to.equal(404);
-        var record = _.isObject(body) ? body: JSON.parse(body);
+        var record = _.isObject(body) ? body : JSON.parse(body);
         expect(record).to.contain.keys('error');
         done();
       });
@@ -108,7 +108,7 @@ describe('Resource(basic)', function() {
         var path = response.headers.location;
         request.get({ url: test.baseUrl + path }, function(err, response, body) {
           expect(response.statusCode).to.equal(200);
-          var record = _.isObject(body) ? body: JSON.parse(body);
+          var record = _.isObject(body) ? body : JSON.parse(body);
 
           delete record.id;
           expect(record).to.eql(userData);
@@ -122,7 +122,7 @@ describe('Resource(basic)', function() {
     it('should return 404 for invalid record', function(done) {
       request.put({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
         expect(response.statusCode).to.equal(404);
-        var record = _.isObject(body) ? body: JSON.parse(body);
+        var record = _.isObject(body) ? body : JSON.parse(body);
         expect(record).to.contain.keys('error');
         done();
       });
@@ -143,7 +143,7 @@ describe('Resource(basic)', function() {
           json: { email: 'emma@fmail.co.uk' }
         }, function(err, response, body) {
           expect(response.statusCode).to.equal(200);
-          var record = _.isObject(body) ? body: JSON.parse(body);
+          var record = _.isObject(body) ? body : JSON.parse(body);
 
           delete record.id;
           userData.email = 'emma@fmail.co.uk';
@@ -158,14 +158,14 @@ describe('Resource(basic)', function() {
     it('should return 404 for invalid record', function(done) {
       request.del({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
         expect(response.statusCode).to.equal(404);
-        var record = _.isObject(body) ? body: JSON.parse(body);
+        var record = _.isObject(body) ? body : JSON.parse(body);
         expect(record).to.contain.keys('error');
         done();
       });
     });
 
     it('should delete a record', function(done) {
-      var userData = { username: "chicken", email: "chicken@gmail.com" };
+      var userData = { username: 'chicken', email: 'chicken@gmail.com' };
       request.post({
         url: test.baseUrl + '/users',
         json: userData
@@ -189,12 +189,12 @@ describe('Resource(basic)', function() {
   describe('list', function() {
     beforeEach(function(done) {
       test.userlist = [
-        { username: "arthur", email: "arthur@gmail.com" },
-        { username: "james", email: "james@gmail.com" },
-        { username: "henry", email: "henry@gmail.com" },
-        { username: "william", email: "william@gmail.com" },
-        { username: "edward", email: "edward@gmail.com" },
-        { username: "arthur", email: "aaaaarthur@gmail.com" }
+        { username: 'arthur', email: 'arthur@gmail.com' },
+        { username: 'james', email: 'james@gmail.com' },
+        { username: 'henry', email: 'henry@gmail.com' },
+        { username: 'william', email: 'william@gmail.com' },
+        { username: 'edward', email: 'edward@gmail.com' },
+        { username: 'arthur', email: 'aaaaarthur@gmail.com' }
       ];
 
       async.each(test.userlist, function(data, callback) {
@@ -228,7 +228,7 @@ describe('Resource(basic)', function() {
       request.get({ url: test.baseUrl + '/users?offset=1&count=2' }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
-        expect(records).to.eql(test.userlist.slice(1,3));
+        expect(records).to.eql(test.userlist.slice(1, 3));
         expect(response.headers['content-range']).to.equal('items 1-2/6');
         done();
       });
@@ -239,7 +239,7 @@ describe('Resource(basic)', function() {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(response.headers['content-range']).to.equal('items 0-0/1');
-        expect(records).to.eql([{ username: "william", email: "william@gmail.com" }]);
+        expect(records).to.eql([{ username: 'william', email: 'william@gmail.com' }]);
         done();
       });
     });
@@ -249,8 +249,8 @@ describe('Resource(basic)', function() {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(response.headers['content-range']).to.equal('items 1-2/6');
-        expect(records).to.eql([{ username: "james", email: "james@gmail.com" },
-                                { username: "henry", email: "henry@gmail.com" }]);
+        expect(records).to.eql([{ username: 'james', email: 'james@gmail.com' },
+                                { username: 'henry', email: 'henry@gmail.com' }]);
         done();
       });
     });
@@ -270,12 +270,12 @@ describe('Resource(basic)', function() {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql([
-          { username: "arthur", email: "arthur@gmail.com" },
-          { username: "arthur", email: "aaaaarthur@gmail.com" },
-          { username: "edward", email: "edward@gmail.com" },
-          { username: "henry", email: "henry@gmail.com" },
-          { username: "james", email: "james@gmail.com" },
-          { username: "william", email: "william@gmail.com" }
+          { username: 'arthur', email: 'arthur@gmail.com' },
+          { username: 'arthur', email: 'aaaaarthur@gmail.com' },
+          { username: 'edward', email: 'edward@gmail.com' },
+          { username: 'henry', email: 'henry@gmail.com' },
+          { username: 'james', email: 'james@gmail.com' },
+          { username: 'william', email: 'william@gmail.com' }
         ]);
         done();
       });
@@ -286,12 +286,12 @@ describe('Resource(basic)', function() {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql([
-          { username: "william", email: "william@gmail.com" },
-          { username: "james", email: "james@gmail.com" },
-          { username: "henry", email: "henry@gmail.com" },
-          { username: "edward", email: "edward@gmail.com" },
-          { username: "arthur", email: "arthur@gmail.com" },
-          { username: "arthur", email: "aaaaarthur@gmail.com" }
+          { username: 'william', email: 'william@gmail.com' },
+          { username: 'james', email: 'james@gmail.com' },
+          { username: 'henry', email: 'henry@gmail.com' },
+          { username: 'edward', email: 'edward@gmail.com' },
+          { username: 'arthur', email: 'arthur@gmail.com' },
+          { username: 'arthur', email: 'aaaaarthur@gmail.com' }
         ]);
         done();
       });
@@ -302,12 +302,12 @@ describe('Resource(basic)', function() {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql([
-          { username: "arthur", email: "aaaaarthur@gmail.com" },
-          { username: "arthur", email: "arthur@gmail.com" },
-          { username: "edward", email: "edward@gmail.com" },
-          { username: "henry", email: "henry@gmail.com" },
-          { username: "james", email: "james@gmail.com" },
-          { username: "william", email: "william@gmail.com" }
+          { username: 'arthur', email: 'aaaaarthur@gmail.com' },
+          { username: 'arthur', email: 'arthur@gmail.com' },
+          { username: 'edward', email: 'edward@gmail.com' },
+          { username: 'henry', email: 'henry@gmail.com' },
+          { username: 'james', email: 'james@gmail.com' },
+          { username: 'william', email: 'william@gmail.com' }
         ]);
         done();
       });
@@ -318,12 +318,12 @@ describe('Resource(basic)', function() {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql([
-          { username: "arthur", email: "arthur@gmail.com" },
-          { username: "arthur", email: "aaaaarthur@gmail.com" },
-          { username: "edward", email: "edward@gmail.com" },
-          { username: "henry", email: "henry@gmail.com" },
-          { username: "james", email: "james@gmail.com" },
-          { username: "william", email: "william@gmail.com" }
+          { username: 'arthur', email: 'arthur@gmail.com' },
+          { username: 'arthur', email: 'aaaaarthur@gmail.com' },
+          { username: 'edward', email: 'edward@gmail.com' },
+          { username: 'henry', email: 'henry@gmail.com' },
+          { username: 'james', email: 'james@gmail.com' },
+          { username: 'william', email: 'william@gmail.com' }
         ]);
         done();
       });

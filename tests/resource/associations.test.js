@@ -10,20 +10,20 @@ var request = require('request'),
 describe('Resource(associations)', function() {
   before(function() {
     test.models.User = test.db.define('users', {
-      id:       { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
+      id: { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
       username: { type: test.Sequelize.STRING, unique: true },
-      email:    { type: test.Sequelize.STRING, unique: true, validate: { isEmail: true } }
+      email: { type: test.Sequelize.STRING, unique: true, validate: { isEmail: true } }
     }, {
       underscored: true,
       timestamps: false
     });
 
     test.models.Address = test.db.define('addresses', {
-      id:             { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
-      street:         { type: test.Sequelize.STRING },
+      id: { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
+      street: { type: test.Sequelize.STRING },
       state_province: { type: test.Sequelize.STRING },
-      postal_code:    { type: test.Sequelize.STRING },
-      country_code:   { type: test.Sequelize.STRING }
+      postal_code: { type: test.Sequelize.STRING },
+      country_code: { type: test.Sequelize.STRING }
     }, {
       underscored: true,
       timestamps: false
@@ -113,23 +113,23 @@ describe('Resource(associations)', function() {
       test.expectedResult = [];
       var testData = [
         {
-          user: { username: "sherlock", email: "sherlock@gmail.com" },
+          user: { username: 'sherlock', email: 'sherlock@gmail.com' },
           address: { street: '221B Baker Street', state_province: 'London, UK', postal_code: 'NW1', country_code: '44'}
         },
         {
-          user: { username: "barack", email: "barack@gmail.com" },
+          user: { username: 'barack', email: 'barack@gmail.com' },
           address: { street: '1600 Pennsylvania Ave', state_province: 'Washington, DC', postal_code: '20500', country_code: '001'}
         },
         {
-          user: { username: "tony", email: "tony@gmail.com" },
+          user: { username: 'tony', email: 'tony@gmail.com' },
           address: { street: '633 Stag Trail RD', state_province: 'Caldwell, NJ', postal_code: '07006', country_code: '001'}
         },
         {
-          user: { username: "eddie", email: "eddie@gmail.com" },
+          user: { username: 'eddie', email: 'eddie@gmail.com' },
           address: { street: '1313 Mockingbird Ln', state_province: 'Lincoln, CA', postal_code: '95648', country_code: '001'}
         },
         {
-          user: { username: "lucy", email: "lucy@gmail.com" },
+          user: { username: 'lucy', email: 'lucy@gmail.com' },
           address: { street: '623 East 68th Street', state_province: 'New York, NY', postal_code: '10065', country_code: '001'}
         }
       ];

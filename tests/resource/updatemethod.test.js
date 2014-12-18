@@ -9,9 +9,9 @@ var request = require('request'),
 describe('Resource(updateMethod)', function() {
   before(function() {
     test.models.User = test.db.define('users', {
-      id:       { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
+      id: { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
       username: { type: test.Sequelize.STRING, unique: true },
-      email:    { type: test.Sequelize.STRING, unique: true, validate: { isEmail: true } }
+      email: { type: test.Sequelize.STRING, unique: true, validate: { isEmail: true } }
     }, {
       underscored: true,
       timestamps: false
@@ -36,7 +36,7 @@ describe('Resource(updateMethod)', function() {
       rest.initialize({
         app: test.app,
         sequelize: test.Sequelize,
-        updateMethod: 'patch',
+        updateMethod: 'patch'
       });
 
       rest.resource({
@@ -57,7 +57,7 @@ describe('Resource(updateMethod)', function() {
           json: { email: 'emma@fmail.co.uk' }
         }, function(err, response, body) {
           expect(response.statusCode).to.equal(200);
-          var record = _.isObject(body) ? body: JSON.parse(body);
+          var record = _.isObject(body) ? body : JSON.parse(body);
 
           delete record.id;
           userData.email = 'emma@fmail.co.uk';
@@ -73,7 +73,7 @@ describe('Resource(updateMethod)', function() {
       rest.initialize({
         app: test.app,
         sequelize: test.Sequelize,
-        updateMethod: 'put',
+        updateMethod: 'put'
       });
 
       rest.resource({
@@ -94,7 +94,7 @@ describe('Resource(updateMethod)', function() {
           json: { email: 'emma@fmail.co.uk' }
         }, function(err, response, body) {
           expect(response.statusCode).to.equal(200);
-          var record = _.isObject(body) ? body: JSON.parse(body);
+          var record = _.isObject(body) ? body : JSON.parse(body);
 
           delete record.id;
           userData.email = 'emma@fmail.co.uk';
@@ -110,7 +110,7 @@ describe('Resource(updateMethod)', function() {
       rest.initialize({
         app: test.app,
         sequelize: test.Sequelize,
-        updateMethod: 'post',
+        updateMethod: 'post'
       });
 
       rest.resource({
@@ -131,7 +131,7 @@ describe('Resource(updateMethod)', function() {
           json: { email: 'emma@fmail.co.uk' }
         }, function(err, response, body) {
           expect(response.statusCode).to.equal(200);
-          var record = _.isObject(body) ? body: JSON.parse(body);
+          var record = _.isObject(body) ? body : JSON.parse(body);
 
           delete record.id;
           userData.email = 'emma@fmail.co.uk';

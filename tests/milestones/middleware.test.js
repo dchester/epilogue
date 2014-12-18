@@ -17,9 +17,9 @@ function verifyBeforeAndAfter(object) {
 describe('Milestones(middleware)', function() {
   before(function() {
     test.models.User = test.db.define('users', {
-      id:       { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
+      id: { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
       username: { type: test.Sequelize.STRING, unique: true },
-      email:    { type: test.Sequelize.STRING, unique: true, validate: { isEmail: true } }
+      email: { type: test.Sequelize.STRING, unique: true, validate: { isEmail: true } }
     }, {
       underscored: true,
       timestamps: false
@@ -44,8 +44,8 @@ describe('Milestones(middleware)', function() {
   });
 
   _.forOwn({
-    "without before and after": testMiddleware,
-    "with before and after": testMiddlewareBeforeAndAfter
+    'without before and after': testMiddleware,
+    'with before and after': testMiddlewareBeforeAndAfter
   }, function(middleware, description) {
 
     describe(description, function() {

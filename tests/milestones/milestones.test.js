@@ -9,9 +9,9 @@ var request = require('request'),
 describe('Milestones', function() {
   before(function() {
     test.models.User = test.db.define('users', {
-      id:       { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
+      id: { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
       username: { type: test.Sequelize.STRING, unique: true },
-      email:    { type: test.Sequelize.STRING, unique: true, validate: { isEmail: true } }
+      email: { type: test.Sequelize.STRING, unique: true, validate: { isEmail: true } }
     }, {
       underscored: true,
       timestamps: false

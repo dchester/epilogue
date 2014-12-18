@@ -29,7 +29,7 @@ var TestFixture = {
       TestFixture.server = http.createServer(TestFixture.app);
     }
 
-    TestFixture.server.listen(48281, function() {
+    TestFixture.server.listen(0, function() {
       TestFixture.baseUrl =
         'http://' + TestFixture.server.address().address + ':' + TestFixture.server.address().port;
       callback();

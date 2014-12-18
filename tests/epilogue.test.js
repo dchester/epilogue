@@ -14,7 +14,7 @@ describe('Epilogue', function() {
     expect(epilogue.initialize.bind(epilogue, {
       app: {},
       sequelize: {},
-      updateMethod: "dogs"
+      updateMethod: 'dogs'
     })).to.throw('updateMethod must be one of PUT, POST, or PATCH');
     done();
   });
