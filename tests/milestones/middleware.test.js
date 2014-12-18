@@ -61,6 +61,8 @@ describe('Milestones(middleware)', function() {
         });
 
         test.userResource.use(middleware);
+        expect(middleware.results.extraConfiguration).to.be.true;
+
         done();
       });
 

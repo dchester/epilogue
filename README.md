@@ -100,7 +100,7 @@ module.exports = {
       }
     }
   }
-}
+};
 
 // my-app.js
 var rest = require('epilogue'),
@@ -117,6 +117,22 @@ var users = rest.resource({
 });
 
 users.use(restMiddleware);
+```
+
+Epilogue middleware also supports bundling in extra resource configuration by specifying
+an "extraConfiguration" member of the middleware like so:
+
+```
+// my-middleware.js
+module.exports = {
+  extraConfiguration: function(resource) {
+    // support delete for plural form of a resource
+    var app = resource.app;
+    app.del(resource.endpoints.plural, function(req, res) {
+      resource.controllers.delete._control(req, res);
+    });
+  }
+};
 ```
 
 ### Pagination
