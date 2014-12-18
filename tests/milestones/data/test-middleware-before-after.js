@@ -1,9 +1,13 @@
 'use strict';
 
 var TestMiddlewareBeforeAfter = {
-  results: {}
+  results: {},
+  extraConfiguration: function(resource) {
+    TestMiddlewareBeforeAfter.results.extraConfiguration = true;
+  }
 };
 
+TestMiddlewareBeforeAfter.results.extraConfiguration = false;
 var actions = ['create', 'list', 'read', 'update', 'delete'],
     milestones = ['start', 'auth', 'fetch', 'data', 'write', 'send', 'complete'];
 
