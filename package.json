@@ -1,8 +1,14 @@
 {
   "name": "epilogue",
-  "description": "Create REST resources and controllers with Sequelize and Express",
-  "version": "0.3.1",
+  "description": "Create REST resources and controllers with Sequelize and Express or Restify",
+  "version": "0.3.2",
   "author": "David Chester <dchester@shutterstock.com>",
+  "contributors": [
+    {
+      "name": "Matt Broadstone",
+      "email": "mbroadst@gmail.com"
+    }
+  ],
   "main": "lib/",
   "scripts": {
     "jshint": "jshint ./lib ./tests",
@@ -14,14 +20,22 @@
     "type": "git",
     "url": "https://github.com/dchester/epilogue.git"
   },
+  "bugs": {
+    "url": "https://github.com/dchester/epilogue/issues"
+  },
   "keywords": [
     "sequelize",
     "sequelizejs",
     "rest",
     "restful",
     "epilogue",
-    "json"
+    "json",
+    "api"
   ],
+  "dependencies": {
+    "async": "~0.2.10",
+    "lodash": "~2.4.1"
+  },
   "devDependencies": {
     "sqlite3": "~2.2.0",
     "request": "~2.34.0",
@@ -32,9 +46,5 @@
     "jshint": ">=2.4.2",
     "sequelize": "~1.7.0-rc6",
     "istanbul": "~0.1.45"
-  },
-  "dependencies": {
-    "async": "~0.2.10",
-    "lodash": "~2.4.1"
   }
 }
