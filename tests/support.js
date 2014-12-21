@@ -13,7 +13,7 @@ var TestFixture = {
   initializeDatabase: function(callback) {
     TestFixture.db
       .sync({ force: true })
-      .success(function() {
+      .then(function() {
         callback();
       });
   },
@@ -41,7 +41,7 @@ var TestFixture = {
     TestFixture.db
       .getQueryInterface()
       .dropAllTables()
-      .success(function() {
+      .then(function() {
         callback();
       });
   }
@@ -50,6 +50,7 @@ var TestFixture = {
 before(function() {
   TestFixture.db = new Sequelize('main', null, null, {
     dialect: 'sqlite',
+    storage: ':memory:',
     logging: false
   });
 });

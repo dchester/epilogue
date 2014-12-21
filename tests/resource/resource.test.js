@@ -11,8 +11,15 @@ describe('Resource(basic)', function() {
   before(function() {
     test.models.User = test.db.define('users', {
       id: { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
-      username: { type: test.Sequelize.STRING },
-      email: { type: test.Sequelize.STRING, unique: true, validate: { isEmail: true } }
+      username: {
+        type: test.Sequelize.STRING,
+        allowNull: false
+      },
+      email: {
+        type: test.Sequelize.STRING,
+        unique: { msg: 'must be unique' },
+        validate: { isEmail: true }
+      }
     }, {
       underscored: true,
       timestamps: false
@@ -90,14 +97,57 @@ describe('Resource(basic)', function() {
       });
     });
 
-    it('should not create a record with invalid data', function(done) {
+
+    [
+      {
+        description: 'should catch validation errors',
+        record: { username: 'blah', email: 'notanemail' },
+        expected: {
+          statusCode: 400,
+          keys: ['email']
+        }
+      },
+      {
+        description: 'should catch null field errors',
+        record: { email: 'valid@email.com' },
+        expected: {
+          statusCode: 400,
+          keys: ['username']
+        }
+      }
+    ].forEach(function(createTest) {
+      it(createTest.description, function(done) {
+        request.post({
+          url: test.baseUrl + '/users',
+          json: createTest.record
+        }, function(error, response, body) {
+          var result = _.isObject(body) ? body : JSON.parse(body);
+          expect(response.statusCode).to.equal(createTest.expected.statusCode);
+          expect(result).to.contain.keys(createTest.expected.keys);
+          done();
+        });
+      });
+    });
+
+    it('should catch uniqueness errors', function(done) {
+      var record = { username: 'jamez', email: 'jamez@gmail.com' };
       request.post({
-        url: test.baseUrl + '/users'
+        url: test.baseUrl + '/users',
+        json: record
       }, function(error, response, body) {
-        var result = _.isObject(body) ? body : JSON.parse(body);
-        expect(response.statusCode).to.equal(400);
-        expect(result).to.contain.keys('error');
-        done();
+        expect(error).is.null;
+        expect(response.headers.location).is.not.empty;
+
+        var path = response.headers.location;
+        request.post({
+          url: test.baseUrl + '/users',
+          json: record
+        }, function(err, response, body) {
+          expect(response.statusCode).to.equal(400);
+          var record = _.isObject(body) ? body : JSON.parse(body);
+          expect(record).to.contain.keys(['email']);
+          done();
+        });
       });
     });
 
