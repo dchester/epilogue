@@ -4,9 +4,15 @@ var epilogue = require('../lib'),
     expect = require('chai').expect;
 
 describe('Epilogue', function() {
-
   it('should throw an exception when initialized without arguments', function(done) {
     expect(epilogue.initialize).to.throw('please specify an app');
+    done();
+  });
+
+  it('should throw an exception when initialized without a sequelize instance', function(done) {
+    expect(epilogue.initialize.bind(epilogue, {
+      app: {}
+    })).to.throw('please specify a sequelize instance');
     done();
   });
 
@@ -18,5 +24,4 @@ describe('Epilogue', function() {
     })).to.throw('updateMethod must be one of PUT, POST, or PATCH');
     done();
   });
-
 });
