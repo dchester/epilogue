@@ -3,7 +3,8 @@
 var Sequelize = require('sequelize'),
     http = require('http'),
     express = require('express'),
-    restify = require('restify');
+    restify = require('restify'),
+    chai = require('chai');
 
 var TestFixture = {
   models: {},
@@ -52,5 +53,8 @@ before(function() {
     logging: false
   });
 });
+
+// always print stack traces when an error occurs
+chai.config.includeStack = true;
 
 module.exports = TestFixture;
