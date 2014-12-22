@@ -46,6 +46,40 @@ describe('Milestones', function() {
   });
 
   // TESTS
+  describe('general behavior', function() {
+    it('should skip the main action if context.skip is called in before hook', function(done) {
+      var SkipMiddleware = {
+        results: {
+          beforeCalled: false,
+          actionCalled: false
+        },
+        create: {
+          write: {
+            before: function(req, res, context) {
+              SkipMiddleware.results.beforeCalled = true;
+              context.skip();
+            },
+            action: function(req, res, context) {
+              SkipMiddleware.results.actionCalled = true;
+              context.continue();
+            }
+          }
+        }
+      };
+
+      test.userResource.use(SkipMiddleware);
+      request.post({
+        url: test.baseUrl + '/users',
+        json: { username: 'jamez', email: 'jamez@gmail.com' }
+      }, function(err, response, body) {
+        expect(SkipMiddleware.results.beforeCalled).to.be.true;
+        expect(SkipMiddleware.results.actionCalled).to.be.false;
+        done();
+      });
+    });
+
+  });
+
   describe('start', function() {
     // Run at the beginning of the request. Defaults to passthrough.
     it('should support chaining', function(done) {
