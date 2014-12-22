@@ -8,7 +8,7 @@ var TestMiddleware = {
 };
 
 TestMiddleware.results.extraConfiguration = false;
-var actions = ['create', 'list', 'read', 'update', 'delete'],
+var actions = ['create', 'list', 'read', 'update', 'delete', 'all'],
     milestones = ['start', 'auth', 'fetch', 'data', 'write', 'send', 'complete'];
 
 actions.forEach(function(action) {

@@ -76,8 +76,10 @@ describe('Milestones(middleware)', function() {
           _.forOwn(middleware.results.create, function(result, milestone) {
             if (middleware === testMiddlewareBeforeAndAfter) {
               verifyBeforeAndAfter(middleware.results.create[milestone]);
+              verifyBeforeAndAfter(middleware.results.all[milestone]);
             } else {
               expect(middleware.results.create[milestone]).to.be.true;
+              expect(middleware.results.all[milestone]).to.be.true;
             }
           });
 
@@ -92,8 +94,10 @@ describe('Milestones(middleware)', function() {
           _.forOwn(middleware.results.list, function(result, milestone) {
             if (middleware === testMiddlewareBeforeAndAfter) {
               verifyBeforeAndAfter(middleware.results.list[milestone]);
+              verifyBeforeAndAfter(middleware.results.all[milestone]);
             } else {
               expect(middleware.results.list[milestone]).to.be.true;
+              expect(middleware.results.all[milestone]).to.be.true;
             }
           });
 
@@ -115,8 +119,10 @@ describe('Milestones(middleware)', function() {
             _.forOwn(middleware.results.read, function(result, milestone) {
               if (middleware === testMiddlewareBeforeAndAfter) {
                 verifyBeforeAndAfter(middleware.results.read[milestone]);
+                verifyBeforeAndAfter(middleware.results.all[milestone]);
               } else {
                 expect(middleware.results.read[milestone]).to.be.true;
+                expect(middleware.results.all[milestone]).to.be.true;
               }
             });
 
@@ -141,8 +147,10 @@ describe('Milestones(middleware)', function() {
             _.forOwn(middleware.results.update, function(result, milestone) {
               if (middleware === testMiddlewareBeforeAndAfter) {
                 verifyBeforeAndAfter(middleware.results.update[milestone]);
+                verifyBeforeAndAfter(middleware.results.all[milestone]);
               } else {
                 expect(middleware.results.update[milestone]).to.be.true;
+                expect(middleware.results.all[milestone]).to.be.true;
               }
             });
 
@@ -166,8 +174,10 @@ describe('Milestones(middleware)', function() {
             _.forOwn(middleware.results.delete, function(result, milestone) {
               if (middleware === testMiddlewareBeforeAndAfter) {
                 verifyBeforeAndAfter(middleware.results.delete[milestone]);
+                verifyBeforeAndAfter(middleware.results.all[milestone]);
               } else {
                 expect(middleware.results.delete[milestone]).to.be.true;
+                expect(middleware.results.all[milestone]).to.be.true;
               }
             });
 
