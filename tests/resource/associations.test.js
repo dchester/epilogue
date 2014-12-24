@@ -29,7 +29,19 @@ describe('Resource(associations)', function() {
       timestamps: false
     });
 
+    test.models.Person = test.db.define('person', {
+      id: { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
+      name: { type: test.Sequelize.STRING, unique: true }
+    }, {
+      underscored: true,
+      timestamps: false
+    });
+
     test.models.User.belongsTo(test.models.Address);  // user has an address_id
+    test.models.Person.belongsTo(test.models.Address, {
+      as: 'addy',
+      foreignKey: 'addy_id'
+    });
   });
 
   beforeEach(function(done) {
@@ -44,6 +56,12 @@ describe('Resource(associations)', function() {
           model: test.models.User,
           include: [test.models.Address],
           endpoints: ['/users', '/users/:id']
+        });
+
+        rest.resource({
+          model: test.models.Person,
+          include: [{ model: test.models.Address, as: 'addy' }],
+          endpoints: ['/people', '/people/:id']
         });
 
         rest.resource({
@@ -72,13 +90,27 @@ describe('Resource(associations)', function() {
         expect(response.statusCode).to.equal(201);
         var address = body;
 
-        request.post({
-          url: test.baseUrl + '/users',
-          json: { username: 'sherlock', email: 'sherlock@holmes.com', address_id: address.id }
-        }, function(error, response, body) {
-          expect(response.statusCode).to.equal(201);
-          done();
-        });
+        async.series([
+          function(callback) {
+            request.post({
+              url: test.baseUrl + '/users',
+              json: { username: 'sherlock', email: 'sherlock@holmes.com', address_id: address.id }
+            }, function(error, response, body) {
+              expect(response.statusCode).to.equal(201);
+              callback();
+            });
+          },
+          function(callback) {
+            request.post({
+              url: test.baseUrl + '/people',
+              json: { name: 'barney', addy_id: address.id }
+            }, function(error, response, body) {
+              expect(response.statusCode).to.equal(201);
+              done();
+            });
+          }
+        ], done);
+
       });
     });
 
@@ -93,6 +125,29 @@ describe('Resource(associations)', function() {
           username: 'sherlock',
           email: 'sherlock@holmes.com',
           address: {
+            id: 1,
+            street: '221B Baker Street',
+            state_province: 'London',
+            postal_code: 'NW1',
+            country_code: '44'
+          }
+        };
+
+        expect(result).to.eql(expected);
+        done();
+      });
+    });
+
+    it('should include prefetched data for an aliased relation', function(done) {
+      request.get({
+        url: test.baseUrl + '/people/1'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        var expected = {
+          id: 1,
+          name: 'barney',
+          addy: {
             id: 1,
             street: '221B Baker Street',
             state_province: 'London',
