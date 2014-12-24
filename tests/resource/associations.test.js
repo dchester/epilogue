@@ -59,6 +59,11 @@ describe('Resource(associations)', function() {
         });
 
         rest.resource({
+          model: test.models.User,
+          endpoints: ['/usersWithoutInclude', '/usersWithoutInclude/:id']
+        });
+
+        rest.resource({
           model: test.models.Person,
           include: [{ model: test.models.Address, as: 'addy' }],
           endpoints: ['/people', '/people/:id']
@@ -223,9 +228,32 @@ describe('Resource(associations)', function() {
     });
 
     it('should include prefetched data for relations', function(done) {
-      request.get({ url: test.baseUrl + '/users' }, function(error, response, body) {
+      request.get({
+        url: test.baseUrl + '/users'
+      }, function(error, response, body) {
         var result = _.isObject(body) ? body : JSON.parse(body);
         expect(result).to.eql(test.expectedResult);
+        done();
+      });
+    });
+
+    it('should pass query parameters to search', function(done) {
+      request.get({
+        url: test.baseUrl + '/usersWithoutInclude?address_id=1'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result.length).to.equal(1);
+
+        var actual = result[0];
+        var expected = {
+          id: 1,
+          username: 'sherlock',
+          email: 'sherlock@gmail.com',
+          address_id: 1
+        };
+
+        expect(actual).to.eql(expected);
         done();
       });
     });
