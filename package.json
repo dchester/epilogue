@@ -34,7 +34,8 @@
   ],
   "dependencies": {
     "async": "~0.2.10",
-    "lodash": "~2.4.1"
+    "lodash": "~2.4.1",
+    "inflection": "1.5.3"
   },
   "devDependencies": {
     "sqlite3": "~2.2.0",

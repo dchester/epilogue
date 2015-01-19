@@ -17,6 +17,15 @@ describe('Resource(basic)', function() {
       underscored: true,
       timestamps: false
     });
+
+    test.models.Person = test.db.define('person', {
+      id: { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
+      firstname: { type: test.Sequelize.STRING },
+      lastname: { type: test.Sequelize.STRING }
+    }, {
+      underscored: true,
+      timestamps: false
+    });
   });
 
   beforeEach(function(done) {
@@ -58,6 +67,14 @@ describe('Resource(basic)', function() {
       }
 
       done();
+    });
+
+    it('should auto generate endpoints if none were provided', function() {
+      var resource = rest.resource({
+        model: test.models.Person
+      });
+
+      expect(resource.endpoints).to.eql({ plural: '/people', singular: '/people/:id' });
     });
   });
 
