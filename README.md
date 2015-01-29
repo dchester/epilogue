@@ -145,6 +145,7 @@ Add query parameters named after fields to limit results.
 
 ```bash
 $ curl http://localhost/users?name=James+Conrad
+
 HTTP/1.1 200 OK
 Content-Type: application/json
 
