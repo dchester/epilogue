@@ -122,7 +122,7 @@ users.use(restMiddleware);
 Epilogue middleware also supports bundling in extra resource configuration by specifying
 an "extraConfiguration" member of the middleware like so:
 
-```
+```javascript
 // my-middleware.js
 module.exports = {
   extraConfiguration: function(resource) {
@@ -135,6 +135,69 @@ module.exports = {
 };
 ```
 
+## REST API
+
+Listing resources support filtering, searching, sorting, and pagination as described below.
+
+### Filtering
+
+Add query parameters named after fields to limit results.
+
+```bash
+$ curl http://localhost/users?name=James+Conrad
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+  {
+    "name": "James Conrad",
+    "email": "jamesconrad@fastmail.fm"
+  }
+]
+```
+
+### Search
+
+Use the `q` parameter to perform a substring search across all fields.
+
+```bash
+$ curl http://localhost/users?q=james
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+  {
+    "name": "James Conrad",
+    "email": "jamesconrad@fastmail.fm"
+  }, {
+    "name": "Jim Huntington",
+    "email": "jamesh@huntington.mx"
+  }
+]
+```
+
+### Sorting
+
+Specify the `sort` parameter to sort results.  Values are field names, optionally preceded by a `-` to indicate descending order.  Multiple sort values may be separated by `,`.
+
+```bash
+$ curl http://localhost/users?sort=-name
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+  {
+    "name": "Jim Huntington",
+    "email": "jamesh@huntington.mx"
+  }, {
+    "name": "James Conrad",
+    "email": "jamesconrad@fastmail.fm"
+  }
+]
+```
+
 ### Pagination
 
 List routes support pagination via `offset` or `page` and `count` query parameters.  Find metadata about pagination and number of results in the `Content-Range` response header.
@@ -142,12 +205,13 @@ List routes support pagination via `offset` or `page` and `count` query paramete
 ```bash
 # get the third page of results
 $ curl http://localhost/users?offset=200&count=100
+
 HTTP/1.1 200 OK
 Content-Type: application/json
 Content-Range: items 200-299/3230
 
 [
-  { name: "James Conrad" },
+  { "name": "James Conrad", ... },
   ...
 ]
 ```
