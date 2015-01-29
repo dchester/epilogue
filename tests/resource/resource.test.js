@@ -296,6 +296,16 @@ describe('Resource(basic)', function() {
       });
     });
 
+    it('should list all records matching a field name and value', function(done) {
+      request.get({ url: test.baseUrl + '/users?username=henry' }, function(err, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
+        expect(records).to.eql([{ username: 'henry', email: 'henry@gmail.com' }]);
+        expect(response.headers['content-range']).to.equal('items 0-0/1');
+        done();
+      });
+    });
+
     it('should list some records using offset and count', function(done) {
       request.get({ url: test.baseUrl + '/users?offset=1&count=2' }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
