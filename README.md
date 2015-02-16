@@ -201,7 +201,7 @@ Content-Type: application/json
 
 ### Pagination
 
-List routes support pagination via `offset` or `page` and `count` query parameters.  Find metadata about pagination and number of results in the `Content-Range` response header.
+List routes support pagination via `offset` or `page` and `count` query parameters.  Find metadata about pagination and number of results in the `Content-Range` response header. Pagination defaults to a default of 100 results per page, and a maximum of 1000 results per page.
 
 ```bash
 # get the third page of results
@@ -215,6 +215,16 @@ Content-Range: items 200-299/3230
   { "name": "James Conrad", ... },
   ...
 ]
+```
+
+Alternatively, you can specify that pagination is disabled for a given resource by passing false to the pagination property like so:
+
+```javascript
+var users = rest.resource({
+    model: User,
+    endpoints: ['/users', '/users/:id'],
+    pagination: false
+});
 ```
 
 ## Epilogue API
