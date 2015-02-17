@@ -178,6 +178,25 @@ Content-Type: application/json
 ]
 ```
 
+Search behavior can be customized to change the parameter used for searching, as well as which attributes are included in the search, like so:
+
+```javascript
+var users = rest.resource({
+    model: User,
+    endpoints: ['/users', '/users/:id'],
+    search: {
+      param: 'searchOnlyUsernames',
+      attributes: [ 'username' ]
+    }
+});
+```
+
+This would restrict substring searches to the ```username``` attribute of the User model, and the search parameter would be 'searchOnlyUsernames':
+
+```bash
+$ curl http://localhost/users?searchOnlyUsernames=james
+```
+
 ### Sorting
 
 Specify the `sort` parameter to sort results.  Values are field names, optionally preceded by a `-` to indicate descending order.  Multiple sort values may be separated by `,`.
