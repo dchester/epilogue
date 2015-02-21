@@ -218,7 +218,7 @@ describe('Resource(associations)', function() {
           });
         });
       }, function(err) {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
         done();
       });
     });

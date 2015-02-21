@@ -59,8 +59,7 @@ describe('Resource(pagination)', function() {
               { username: 'james', email: 'james@gmail.com' },
               { username: 'henry', email: 'henry@gmail.com' },
               { username: 'william', email: 'william@gmail.com' },
-              { username: 'edward', email: 'edward@gmail.com' },
-              { username: 'arthur', email: 'aaaaarthur@gmail.com' }
+              { username: 'edward', email: 'edward@gmail.com' }
             ];
 
             async.each(test.userlist, function(data, callback) {
@@ -91,7 +90,7 @@ describe('Resource(pagination)', function() {
           expect(records).to.eql(test.userlist);
 
           if (!_.has(suite.configuration, 'pagination') || !!suite.configuration.pagination)
-            expect(response.headers['content-range']).to.equal('items 0-5/6');
+            expect(response.headers['content-range']).to.equal('items 0-4/5');
           else
             expect(response.headers['content-range']).to.not.exist;
 

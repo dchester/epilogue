@@ -3,6 +3,7 @@
 var Sequelize = require('sequelize'),
     http = require('http'),
     express = require('express'),
+    bodyParser = require('body-parser'),
     restify = require('restify'),
     chai = require('chai');
 
@@ -25,12 +26,12 @@ var TestFixture = {
       TestFixture.server.use(restify.bodyParser());
     } else {
       TestFixture.app = express();
-      TestFixture.app.use(express.json());
-      TestFixture.app.use(express.urlencoded());
+      TestFixture.app.use(bodyParser.json());
+      TestFixture.app.use(bodyParser.urlencoded({ extended: false }));
       TestFixture.server = http.createServer(TestFixture.app);
     }
 
-    TestFixture.server.listen(0, function() {
+    TestFixture.server.listen(0, '127.0.0.1', function() {
       TestFixture.baseUrl =
         'http://' + TestFixture.server.address().address + ':' + TestFixture.server.address().port;
       callback();
