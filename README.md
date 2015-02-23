@@ -4,30 +4,44 @@
 
 Create flexible REST endpoints and controllers from [Sequelize](http://www.sequelizejs.com/) models in your [Express](http://expressjs.com/) app in Node.
 
-### Start with a model
-
-Define your models with [Sequelize](http://www.sequelizejs.com/) on top of MySQL, Postgres, or SQLite.  Describe tables and columns and their attributes, model entity relationships, etc.
-
+### Getting Started
 ```javascript
-var User = sequelize.define(...);
-```
+var Sequelize = require('sequelize'),
+    restify = require('restify'),
+    epilogue = require('epilogue');
 
-### Create a resource
-
-Load up `epilogue` and provide a reference to your Express app.  Then create resources, specifying a model and endpoints.
-
-```javascript
-var rest = require('epilogue');
-
-rest.initialize({
-    app: app,
-    sequelize: sequelize
+// Define your models
+var database = new Sequelize('database', 'root', 'password');
+var User = database.define('User', {
+  username: Sequelize.STRING,
+  birthday: Sequelize.DATE
 });
 
-var users = rest.resource({
-    model: User,
-    endpoints: ['/users', '/users/:id']
+// Initialize server
+var server = restify.createServer();
+server.use(restify.queryParser());
+server.use(restify.bodyParser());
+
+// Initialize epilogue
+epilogue.initialize({
+  app: server,
+  sequelize: database
 });
+
+// Create REST resource
+var userResource = epilogue.resource({
+  model: User,
+  endpoints: ['/users', '/users/:id']
+});
+
+// Create database and listen
+database
+  .sync({ force: true })
+  .then(function() {
+    server.listen(function() {
+      console.log('%s listening at %s', server.name, server.url);
+    });
+  });
 ```
 
 ### Controllers and endpoints
@@ -346,7 +360,8 @@ Skip to the next milestone, usually called from `before`.
 
 ## License
 
-Copyright (C) 2012-2014 David Chester
+Copyright (C) 2012-2015 David Chester
+Copyright (C) 2014-2015 Matt Broadstone
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
