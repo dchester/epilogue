@@ -5,9 +5,10 @@ var Promise = require('bluebird'),
     expect = require('chai').expect,
     _ = require('lodash'),
     rest = require('../../lib'),
-    test = require('../support');
+    test = require('../support'),
+    Promise = test.Sequelize.Promise;
 
-describe('Resource(associations)', function() {
+describe('Associations(BelongsTo)', function() {
   before(function() {
     test.models.User = test.db.define('users', {
       id: { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
@@ -133,7 +134,7 @@ describe('Resource(associations)', function() {
       });
     });
 
-    it('should include prefetched data for relations', function(done) {
+    it('should include prefetched data', function(done) {
       request.get({
         url: test.baseUrl + '/users/1'
       }, function(error, response, body) {
@@ -227,7 +228,7 @@ describe('Resource(associations)', function() {
       delete test.expectedResults;
     });
 
-    it('should include prefetched data for relations', function(done) {
+    it('should include prefetched data', function(done) {
       request.get({
         url: test.baseUrl + '/users'
       }, function(error, response, body) {
