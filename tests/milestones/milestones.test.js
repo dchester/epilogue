@@ -78,6 +78,16 @@ describe('Milestones', function() {
       });
     });
 
+    it('should throw an error on invalid milestone definition', function() {
+      try {
+        test.userResource.controllers.create.milestone('stert', function(req, res, context) {
+        // no-op
+        });
+      } catch (error) {
+        expect(error.message).to.equal('invalid milestone: stert');
+      }
+    });
+
   });
 
   describe('start', function() {

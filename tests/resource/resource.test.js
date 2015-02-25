@@ -22,7 +22,15 @@ describe('Resource(basic)', function() {
       }
     }, {
       underscored: true,
-      timestamps: false
+      timestamps: false,
+      hooks: {
+        beforeFind: function(options) {
+          if (this.enableBrokenFindTest) {
+            this.enableBrokenFindTest = false;
+            throw new Error('brokenFind');
+          }
+        }
+      }
     });
 
     test.models.Person = test.db.define('person', {
@@ -31,7 +39,7 @@ describe('Resource(basic)', function() {
       lastname: { type: test.Sequelize.STRING }
     }, {
       underscored: true,
-      timestamps: false
+      timestamps: false,
     });
   });
 
@@ -43,9 +51,18 @@ describe('Resource(basic)', function() {
           sequelize: test.Sequelize
         });
 
-        rest.resource({
+        test.userResource = rest.resource({
           model: test.models.User,
           endpoints: ['/users', '/users/:id']
+        });
+
+        test.userResource.list.fetch.before(function(req, res, context) {
+          if (!!test.userResource.enableCriteriaTest) {
+            context.criteria = { id: 1 };
+            test.userResource.enableCriteriaTest = false;
+          }
+
+          context.continue();
         });
 
         done();
@@ -160,7 +177,9 @@ describe('Resource(basic)', function() {
 
   describe('read', function() {
     it('should return proper error for an invalid record', function(done) {
-      request.get({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
+      request.get({
+        url: test.baseUrl + '/users/42'
+      }, function(err, response, body) {
         expect(response.statusCode).to.equal(404);
         var record = _.isObject(body) ? body : JSON.parse(body);
         expect(record).to.contain.keys('message');
@@ -178,7 +197,9 @@ describe('Resource(basic)', function() {
         expect(response.headers.location).is.not.empty;
 
         var path = response.headers.location;
-        request.get({ url: test.baseUrl + path }, function(err, response, body) {
+        request.get({
+          url: test.baseUrl + path
+        }, function(err, response, body) {
           expect(response.statusCode).to.equal(200);
           var record = _.isObject(body) ? body : JSON.parse(body);
 
@@ -188,11 +209,36 @@ describe('Resource(basic)', function() {
         });
       });
     });
+
+    it('should return an error when find fails during read', function(done) {
+      request.post({
+        url: test.baseUrl + '/users',
+        json: { username: 'jamez', email: 'jamez@gmail.com' }
+      }, function(error, response, body) {
+        expect(error).is.null;
+        expect(response.headers.location).is.not.empty;
+        var path = response.headers.location;
+
+        test.models.User.enableBrokenFindTest = true;
+        request.get({
+          url: test.baseUrl + path
+        }, function(err, response, body) {
+          expect(response.statusCode).to.equal(500);
+          var record = _.isObject(body) ? body : JSON.parse(body);
+          expect(record.errors).to.be.ok;
+          expect(record.errors[0]).to.equal('brokenFind');
+          done();
+        });
+      });
+    });
+
   });
 
   describe('update', function() {
     it('should return 404 for invalid record', function(done) {
-      request.put({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
+      request.put({
+        url: test.baseUrl + '/users/42'
+      }, function(err, response, body) {
         expect(response.statusCode).to.equal(404);
         var record = _.isObject(body) ? body : JSON.parse(body);
         expect(record).to.contain.keys('error');
@@ -228,7 +274,9 @@ describe('Resource(basic)', function() {
 
   describe('delete', function() {
     it('should return proper error for invalid record', function(done) {
-      request.del({ url: test.baseUrl + '/users/42' }, function(err, response, body) {
+      request.del({
+        url: test.baseUrl + '/users/42'
+      }, function(err, response, body) {
         expect(response.statusCode).to.equal(404);
         var record = _.isObject(body) ? body : JSON.parse(body);
         expect(record).to.contain.keys('message');
@@ -246,7 +294,9 @@ describe('Resource(basic)', function() {
         expect(response.headers.location).is.not.empty;
 
         var path = response.headers.location;
-        request.del({ url: test.baseUrl + path }, function(err, response, body) {
+        request.del({
+          url: test.baseUrl + path
+        }, function(err, response, body) {
           expect(response.statusCode).to.equal(200);
 
           request.get({ url: test.baseUrl + path }, function(err, response, body) {
@@ -256,6 +306,29 @@ describe('Resource(basic)', function() {
         });
       });
     });
+
+    it('should return an error when find fails during delete', function(done) {
+      request.post({
+        url: test.baseUrl + '/users',
+        json: { username: 'jamez', email: 'jamez@gmail.com' }
+      }, function(error, response, body) {
+        expect(error).is.null;
+        expect(response.headers.location).is.not.empty;
+        var path = response.headers.location;
+
+        test.models.User.enableBrokenFindTest = true;
+        request.del({
+          url: test.baseUrl + path
+        }, function(err, response, body) {
+          expect(response.statusCode).to.equal(500);
+          var record = _.isObject(body) ? body : JSON.parse(body);
+          expect(record.errors).to.be.ok;
+          expect(record.errors[0]).to.equal('brokenFind');
+          done();
+        });
+      });
+    });
+
   });
 
   describe('list', function() {
@@ -287,7 +360,9 @@ describe('Resource(basic)', function() {
     });
 
     it('should list all records', function(done) {
-      request.get({ url: test.baseUrl + '/users' }, function(err, response, body) {
+      request.get({
+        url: test.baseUrl + '/users'
+      }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql(test.userlist);
@@ -297,7 +372,9 @@ describe('Resource(basic)', function() {
     });
 
     it('should list all records matching a field name and value', function(done) {
-      request.get({ url: test.baseUrl + '/users?username=henry' }, function(err, response, body) {
+      request.get({
+        url: test.baseUrl + '/users?username=henry'
+      }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql([{ username: 'henry', email: 'henry@gmail.com' }]);
@@ -307,7 +384,9 @@ describe('Resource(basic)', function() {
     });
 
     it('should list some records using offset and count', function(done) {
-      request.get({ url: test.baseUrl + '/users?offset=1&count=2' }, function(err, response, body) {
+      request.get({
+        url: test.baseUrl + '/users?offset=1&count=2'
+      }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql(test.userlist.slice(1, 3));
@@ -317,7 +396,9 @@ describe('Resource(basic)', function() {
     });
 
     it('should support a generic query string', function(done) {
-      request.get({ url: test.baseUrl + '/users?q=ll' }, function(err, response, body) {
+      request.get({
+        url: test.baseUrl + '/users?q=ll'
+      }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(response.headers['content-range']).to.equal('items 0-0/1');
@@ -327,7 +408,9 @@ describe('Resource(basic)', function() {
     });
 
     it('should support a generic query string as well as other criteria', function(done) {
-      request.get({ url: test.baseUrl + '/users?q=gmail&offset=1&count=2' }, function(err, response, body) {
+      request.get({
+        url: test.baseUrl + '/users?q=gmail&offset=1&count=2'
+      }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(response.headers['content-range']).to.equal('items 1-2/6');
@@ -337,8 +420,27 @@ describe('Resource(basic)', function() {
       });
     });
 
+    it('should support a generic query string as well as criteria added in a milestone', function(done) {
+      test.userResource.enableCriteriaTest = true;
+
+      request.get({
+        url: test.baseUrl + '/users?q=gmail'
+      }, function(err, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
+        expect(response.headers['content-range']).to.equal('items 0-0/1');
+        expect(records).to.eql([
+          { username: 'arthur', email: 'arthur@gmail.com' }
+        ]);
+
+        done();
+      });
+    });
+
     it('should return a valid content-range with no results for a query', function(done) {
-      request.get({ url: test.baseUrl + '/users?q=zzzz' }, function(err, response, body) {
+      request.get({
+        url: test.baseUrl + '/users?q=zzzz'
+      }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql([]);
@@ -348,7 +450,9 @@ describe('Resource(basic)', function() {
     });
 
     it('should sort by a single field ascending', function(done) {
-      request.get({ url: test.baseUrl + '/users?sort=username' }, function(err, response, body) {
+      request.get({
+        url: test.baseUrl + '/users?sort=username'
+      }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql([
@@ -364,7 +468,9 @@ describe('Resource(basic)', function() {
     });
 
     it('should sort by a single field descending', function(done) {
-      request.get({ url: test.baseUrl + '/users?sort=-username' }, function(err, response, body) {
+      request.get({
+        url: test.baseUrl + '/users?sort=-username'
+      }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql([
@@ -380,7 +486,9 @@ describe('Resource(basic)', function() {
     });
 
     it('should sort by multiple fields', function(done) {
-      request.get({ url: test.baseUrl + '/users?sort=username,email' }, function(err, response, body) {
+      request.get({
+        url: test.baseUrl + '/users?sort=username,email'
+      }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql([
@@ -396,7 +504,9 @@ describe('Resource(basic)', function() {
     });
 
     it('should sort by multiple fields ascending/descending', function(done) {
-      request.get({ url: test.baseUrl + '/users?sort=username,-email' }, function(err, response, body) {
+      request.get({
+        url: test.baseUrl + '/users?sort=username,-email'
+      }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql([
@@ -416,6 +526,17 @@ describe('Resource(basic)', function() {
         expect(response.statusCode).to.equal(500);
         done();
       });
+    });
+
+    it('should set a default count if an invalid count was provided', function(done) {
+      async.each([-1, 1001], function(count, callback) {
+        request.get({
+          url: test.baseUrl + '/users?count=' + count
+        }, function(err, response, body) {
+          expect(response.statusCode).to.equal(200);
+          callback();
+        });
+      }, done);
     });
 
   });
