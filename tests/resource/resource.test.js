@@ -521,13 +521,6 @@ describe('Resource(basic)', function() {
       });
     });
 
-    it('should fail with invalid sort criteria', function(done) {
-      request.get({ url: test.baseUrl + '/users?sort=dogs' }, function(err, response, body) {
-        expect(response.statusCode).to.equal(500);
-        done();
-      });
-    });
-
     it('should set a default count if an invalid count was provided', function(done) {
       async.each([-1, 1001], function(count, callback) {
         request.get({
