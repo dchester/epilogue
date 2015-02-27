@@ -63,7 +63,7 @@ Of course it's likely that we'll want more flexibility.  Our `users` resource ha
 ```javascript
 // disallow deletes on users
 users.delete.auth(function(req, res, context) {
-	res.json(403, { error: "can't delete a user" });
+	res.status(403).json({ error: "can't delete a user" });
 	context.stop();
 })
 ```
