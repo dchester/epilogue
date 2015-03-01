@@ -232,6 +232,39 @@ Content-Type: application/json
 ]
 ```
 
+Sort behavior can be customized to change the parameter used for sorting, as well as which attributes are allowed to be used for sorting like so:
+
+```javascript
+var users = rest.resource({
+    model: User,
+    endpoints: ['/users', '/users/:id'],
+    sort: {
+      param: 'orderby',
+      attributes: [ 'username' ]
+    }
+});
+```
+
+This would restrict sorting to only the ```username``` attribute of the User model, and the sort parameter would be 'orderby':
+
+```bash
+$ curl http://localhost/users?orderby=username
+```
+
+By default all attributes defined on the model are allowed to be sorted on. Sorting on a attribute not allowed will cause a 400 error to be returned with errors in the format:
+
+```bash
+$ curl http://localhost/users?sortby=invalid,-otherinvalid,valid
+
+HTTP/1.1 400 BAD REQUEST
+Content-Type: application/json
+
+{
+  "message": "Sorting not allowed on given attributes",
+  "errors": ["invalid", "otherinvalid"]
+}
+```
+
 ### Pagination
 
 List routes support pagination via `offset` or `page` and `count` query parameters.  Find metadata about pagination and number of results in the `Content-Range` response header. Pagination defaults to a default of 100 results per page, and a maximum of 1000 results per page.
