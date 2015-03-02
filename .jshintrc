@@ -18,6 +18,9 @@
   "trailing":true,
   "undef":true,
   "esnext":true,
+  "globals": {
+    "Promise": true
+  },
   "predef": [
     "describe",
     "it",
