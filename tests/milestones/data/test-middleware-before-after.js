@@ -23,15 +23,15 @@ actions.forEach(function(action) {
     TestMiddlewareBeforeAfter[action][milestone] = {
       before: function(req, res, context) {
         TestMiddlewareBeforeAfter.results[action][milestone].before = true;
-        context.continue();
+        return context.continue;
       },
       action: function(req, res, context) {
         TestMiddlewareBeforeAfter.results[action][milestone].action = true;
-        context.continue();
+        return context.continue;
       },
       after: function(req, res, context) {
         TestMiddlewareBeforeAfter.results[action][milestone].after = true;
-        context.continue();
+        return context.continue;
       }
     };
   });

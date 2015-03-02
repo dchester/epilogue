@@ -14,7 +14,7 @@ function verifyBeforeAndAfter(object) {
   expect(object.after).to.be.true;
 }
 
-describe('Milestones(middleware)', function() {
+describe('Middleware', function() {
   before(function() {
     test.models.User = test.db.define('users', {
       id: { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },

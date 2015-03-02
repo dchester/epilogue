@@ -58,31 +58,32 @@ users.delete | DELETE /users/:id | Delete a user
 
 ### Customize behavior
 
-Of course it's likely that we'll want more flexibility.  Our `users` resource has properties for each of the controller actions.  Controller actions in turn have hooks for setting and overriding behavior at each step of the request.  We have these milestones to work with: `start`, `auth`, `fetch`, `data`, `write`, `send`, and `complete`.
+Of course it's likely that we'll want more flexibility.
+Our `users` resource has properties for each of the controller actions.
+Controller actions in turn have hooks for setting and overriding behavior at each step of the request.
+We have these milestones to work with: `start`, `auth`, `fetch`, `data`, `write`, `send`, and `complete`.
 
 ```javascript
 // disallow deletes on users
 users.delete.auth(function(req, res, context) {
-	res.status(403).json({ error: "can't delete a user" });
-	context.stop();
+    throw new ForbiddenError("can't delete a user");
 })
 ```
 
-By default, `fetch`, `write`, and `send` milestones are defined, with the others left open.  We can set behavior for milestones directly as above, or we can add functionality before and after milestones too:
+We can set behavior for milestones directly as above, or we can add functionality before and after milestones too:
 
 ```javascript
 // check the cache first
 users.list.fetch.before(function(req, res, context) {
-
 	var instance = cache.get(context.criteria);
 
 	if (instance) {
 		// keep a reference to the instance and skip the fetch
 		context.instance = instance;
-		context.skip();
+		return context.skip;
 	} else {
 		// cache miss; we continue on
-		context.continue();
+		return context.continue;
 	}
 })
 ```
@@ -95,22 +96,22 @@ module.exports = {
   create: {
     fetch: function(req, res, context) {
       // manipulate the fetch call
-      context.continue();
+      return context.continue;
     }
   },
   list: {
     write: {
       before: function(req, res, context) {
         // modify data before writing list data
-        context.continue();
+        return context.continue;
       },
       action: function(req, res, context) {
         // change behavior of actually writing the data
-        context.continue();
+        return context.continue;
       },
       after: function(req, res, context) {
         // set some sort of flag after writing list data
-        context.continue();
+        return context.continue;
       }
     }
   }
@@ -147,6 +148,18 @@ module.exports = {
     });
   }
 };
+```
+
+To show an error and halt execution of milestone functions you can throw an error:
+
+```javascript
+before: function(req, res, context) {
+    return authenticate.then(function(authed) {
+        if(!authed) throw new ForbiddenError();
+
+        return context.continue;
+    });
+}
 ```
 
 ## REST API
@@ -327,69 +340,10 @@ Create a resource and CRUD actions given a Sequelize model and endpoints.  Accep
 >
 > Create only the specified list of actions for the resource.  Options include `create`, `list`, `read`, `update`, and `delete`.  Defaults to all.
 
-### Milestones
-
-Milestones provide opportunities to run custom application code at various important steps throughout the duration of the request.
-
-Resources have properties for each controller action: `create`, `list`, `read`, `update`, and `delete`.  Also find a meta property `all` as a convenience for hooking into milestones across all controllers.  Each of those properties in turn has methods for setting custom behavior.
-
-For each milestone on a given controller we accept a function to specify custom behavior.  Functions can expect three parameters: a request, a response, and a context object.
-
-#### start(f)
-
-Run at the beginning of the request.  Defaults to passthrough.
-
-#### auth(f)
-
-Authorize the request.  Defaults to passthrough.
-
-#### fetch(f)
-
-Fetch data from the database for non-create actions according to `context.criteria`, writing to `context.instance`.
-
-#### data(f)
-
-Transform the data from the database if needed.  Defaults to passthrough.
-
-#### write(f)
-
-Write to the database for actions that write, reading from `context.attributes`.
-
-#### send(f)
-
-Send the HTTP response, headers along with the data in `context.instance`.
-
-#### complete(f)
-
-Run the specified function when the request is complete, regardless of the status of the response.
 
 ### Milestones & Context
 
-Milestone methods take functions which can expect as paramaters a request, a response, and a context. Context objects contain key properties about the state of the resource at the given request milestone, as well as methods to give back control.
-
-##### context.instance
-
-Instance of a dataset fetched via the supplied model.  May be undefined for early milestones prior to the fetching of the data.
-
-##### context.attributes
-
-Attribues supplied by the request, usually in anticipation of creating or updating an instance.
-
-##### context.criteria
-
-Criteria for fetching, usually supplied by request parameters.
-
-##### context.continue()
-
-Continue with the request, on through the rest of the milestones.
-
-##### context.stop()
-
-Indicate that this should be the last milestone to be processed.
-
-##### context.skip()
-
-Skip to the next milestone, usually called from `before`.
+Check out the [Milestone docs](/docs/Milestones.md)
 
 ## License
 
