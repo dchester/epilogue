@@ -88,9 +88,9 @@ describe('Resource(basic)', function() {
         var resource = new rest.Resource(); // jshint ignore:line
       } catch (exception) {
         expect(exception).to.eql(new Error('resource needs a model'));
+        done();
       }
 
-      done();
     });
 
     it('should auto generate endpoints if none were provided', function() {

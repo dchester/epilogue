@@ -71,8 +71,8 @@ describe('Associations(BelongsTo)', function() {
 
         rest.resource({
           model: test.models.User,
-          include: [test.models.Address],
-          endpoints: ['/users', '/users/:id']
+          endpoints: ['/users', '/users/:id'],
+          associations: true
         });
 
         rest.resource({
@@ -82,8 +82,8 @@ describe('Associations(BelongsTo)', function() {
 
         rest.resource({
           model: test.models.Person,
-          include: [{ model: test.models.Address, as: 'addy' }],
-          endpoints: ['/people', '/people/:id']
+          endpoints: ['/people', '/people/:id'],
+          associations: true
         });
 
         rest.resource({
@@ -174,6 +174,25 @@ describe('Associations(BelongsTo)', function() {
             postal_code: 'NW1',
             country_code: '44'
           }
+        };
+
+        expect(result).to.eql(expected);
+        done();
+      });
+    });
+
+    it('should return associated data by url', function(done) {
+      request.get({
+        url: test.baseUrl + '/users/1/address'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        var expected = {
+          id: 1,
+          street: '221B Baker Street',
+          state_province: 'London',
+          postal_code: 'NW1',
+          country_code: '44'
         };
 
         expect(result).to.eql(expected);
