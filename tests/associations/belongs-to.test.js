@@ -167,6 +167,7 @@ describe('Associations(BelongsTo)', function() {
         var expected = {
           id: 1,
           name: 'barney',
+          hobbies: [],
           addy: {
             id: 1,
             street: '221B Baker Street',
