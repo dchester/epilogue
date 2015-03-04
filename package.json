@@ -34,7 +34,6 @@
   ],
   "dependencies": {
     "async": "~0.9.0",
-    "bluebird": "^2.9.2",
     "lodash": "~3.3.0",
     "merge-defaults": "~0.2.1",
     "inflection": "~1.6.0"
