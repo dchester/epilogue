@@ -1,7 +1,7 @@
 'use strict';
 
-var request = require('request'),
-    async = require('async'),
+var Promise = require('bluebird'),
+    request = require('request'),
     expect = require('chai').expect,
     _ = require('lodash'),
     rest = require('../../lib'),
@@ -333,7 +333,7 @@ describe('Resource(basic)', function() {
   });
 
   describe('list', function() {
-    beforeEach(function(done) {
+    beforeEach(function() {
       test.userlist = [
         { username: 'arthur', email: 'arthur@gmail.com' },
         { username: 'james', email: 'james@gmail.com' },
@@ -343,17 +343,7 @@ describe('Resource(basic)', function() {
         { username: 'arthur', email: 'aaaaarthur@gmail.com' }
       ];
 
-      async.each(test.userlist, function(data, callback) {
-        request.post({
-          url: test.baseUrl + '/users',
-          json: data
-        }, function(error, response, body) {
-          expect(response).to.not.be.null;
-          expect(response.statusCode).to.equal(201);
-          expect(response.headers.location).to.match(/\/users\/\d+/);
-          callback();
-        });
-      }, done);
+      return test.models.User.bulkCreate(test.userlist);
     });
 
     afterEach(function() {
@@ -522,15 +512,21 @@ describe('Resource(basic)', function() {
       });
     });
 
-    it('should set a default count if an invalid count was provided', function(done) {
-      async.each([-1, 1001], function(count, callback) {
-        request.get({
-          url: test.baseUrl + '/users?count=' + count
-        }, function(err, response, body) {
-          expect(response.statusCode).to.equal(200);
-          callback();
-        });
-      }, done);
+    it('should set a default count if an invalid count was provided', function() {
+      var promises = [];
+      [-1, 1001].forEach(function(count) {
+        promises.push(new Promise(function(resolve, reject) {
+          request.get({
+            url: test.baseUrl + '/users?count=' + count
+          }, function(err, response, body) {
+            expect(response.statusCode).to.equal(200);
+            resolve();
+          });
+
+        }));
+      });
+
+      return Promise.all(promises);
     });
 
   });

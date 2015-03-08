@@ -1,9 +1,9 @@
 'use strict';
 
-var request = require('request'),
+var Promise = require('bluebird'),
+    request = require('request'),
     expect = require('chai').expect,
     _ = require('lodash'),
-    async = require('async'),
     rest = require('../../lib'),
     test = require('../support');
 
@@ -87,35 +87,24 @@ describe('Resource(associations)', function() {
 
   // TESTS
   describe('read', function() {
-    beforeEach(function(done) {
-      request.post({
-        url: test.baseUrl + '/addresses',
-        json: { street: '221B Baker Street', state_province: 'London', postal_code: 'NW1', country_code: '44'}
-      }, function(error, response, body) {
-        expect(response.statusCode).to.equal(201);
-        var address = body;
-
-        async.series([
-          function(callback) {
-            request.post({
-              url: test.baseUrl + '/users',
-              json: { username: 'sherlock', email: 'sherlock@holmes.com', address_id: address.id }
-            }, function(error, response, body) {
-              expect(response.statusCode).to.equal(201);
-              callback();
-            });
-          },
-          function(callback) {
-            request.post({
-              url: test.baseUrl + '/people',
-              json: { name: 'barney', addy_id: address.id }
-            }, function(error, response, body) {
-              expect(response.statusCode).to.equal(201);
-              done();
-            });
-          }
-        ], done);
-
+    beforeEach(function() {
+      return Promise.all([
+        test.models.Address.create({
+          street: '221B Baker Street',
+          state_province: 'London',
+          postal_code: 'NW1',
+          country_code: '44'
+        }),
+        test.models.User.create({
+          username: 'sherlock',
+          email: 'sherlock@holmes.com'
+        }),
+        test.models.Person.create({ name: 'barney' })
+      ]).spread(function(address, user, person) {
+        return Promise.all([
+          user.setAddress(address),
+          person.setAddy(address)
+        ]);
       });
     });
 
@@ -169,8 +158,8 @@ describe('Resource(associations)', function() {
   });
 
   describe('list', function() {
-    beforeEach(function(done) {
-      test.expectedResult = [];
+    beforeEach(function() {
+      test.expectedResults = [];
       var testData = [
         {
           user: { username: 'sherlock', email: 'sherlock@gmail.com' },
@@ -194,32 +183,21 @@ describe('Resource(associations)', function() {
         }
       ];
 
-      async.each(testData, function(info, callback) {
-        request.post({
-          url: test.baseUrl + '/addresses',
-          json: info.address
-        }, function(error, response, body) {
-          expect(response.statusCode).to.equal(201);
-          var userData = info.user;
-          var address = _.isObject(body) ? body : JSON.parse(body);
-          userData.address_id = address.id;
+      var promise = Promise.resolve();
+      testData.forEach(function(entry) {
+        promise.then(function() {
+          return Promise.all([
+            test.models.User.create(entry.user),
+            test.models.Address.create(entry.address)
+          ]).spread(function(user, address) {
+            var expectedResult = entry.user;
+            expectedResult.id = user.id;
+            expectedResult.address = address.dataValues;
+            test.expectedResults.push(expectedResult);
 
-          request.post({
-            url: test.baseUrl + '/users',
-            json: userData
-          }, function(error, response, body) {
-            expect(response.statusCode).to.equal(201);
-
-            var record = body;
-            record.address = address;
-            delete record.address_id;
-            test.expectedResult.push(record);
-            callback();
+            return user.setAddress(address);
           });
         });
-      }, function(err) {
-        expect(err).to.not.exist;
-        done();
       });
     });
 
@@ -232,7 +210,7 @@ describe('Resource(associations)', function() {
         url: test.baseUrl + '/users'
       }, function(error, response, body) {
         var result = _.isObject(body) ? body : JSON.parse(body);
-        expect(result).to.eql(test.expectedResult);
+        expect(result).to.eql(test.expectedResults);
         done();
       });
     });

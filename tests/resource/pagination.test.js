@@ -1,7 +1,6 @@
 'use strict';
 
 var request = require('request'),
-    async = require('async'),
     expect = require('chai').expect,
     _ = require('lodash'),
     rest = require('../../lib'),
@@ -62,17 +61,9 @@ describe('Resource(pagination)', function() {
               { username: 'edward', email: 'edward@gmail.com' }
             ];
 
-            async.each(test.userlist, function(data, callback) {
-              request.post({
-                url: test.baseUrl + '/users',
-                json: data
-              }, function(error, response, body) {
-                expect(response).to.not.be.null;
-                expect(response.statusCode).to.equal(201);
-                expect(response.headers.location).to.match(/\/users\/\d+/);
-                callback();
-              });
-            }, done);
+            return test.models.User.bulkCreate(test.userlist).then(function() {
+              done();
+            });
           });
         });
       });

@@ -1,7 +1,6 @@
 'use strict';
 
 var request = require('request'),
-    async = require('async'),
     expect = require('chai').expect,
     _ = require('lodash'),
     rest = require('../../lib'),

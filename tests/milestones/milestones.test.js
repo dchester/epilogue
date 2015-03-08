@@ -1,14 +1,14 @@
 'use strict';
 
-var request = require('request'),
+var Promise = require('bluebird'),
+    request = require('request'),
     expect = require('chai').expect,
     _ = require('lodash'),
     rest = require('../../lib'),
     test = require('../support'),
     errors = require('../../lib/Errors'),
     RequestCompleted = errors.RequestCompleted,
-    EpilogueError = errors.EpilogueError,
-    Promise = require('bluebird');
+    EpilogueError = errors.EpilogueError;
 
 describe('Milestones', function() {
   before(function() {
