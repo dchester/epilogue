@@ -62,7 +62,7 @@ describe('Resource(basic)', function() {
             test.userResource.enableCriteriaTest = false;
           }
 
-          context.continue();
+          return context.continue;
         });
 
         done();
@@ -241,7 +241,8 @@ describe('Resource(basic)', function() {
       }, function(err, response, body) {
         expect(response.statusCode).to.equal(404);
         var record = _.isObject(body) ? body : JSON.parse(body);
-        expect(record).to.contain.keys('error');
+        expect(record).to.contain.keys('message');
+        expect(record.message).to.contain('Not Found');
         done();
       });
     });

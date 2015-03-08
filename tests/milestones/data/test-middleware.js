@@ -18,7 +18,7 @@ actions.forEach(function(action) {
     TestMiddleware.results[action][milestone] = false;
     TestMiddleware[action][milestone] = function(req, res, context) {
       TestMiddleware.results[action][milestone] = true;
-      context.continue();
+      return context.continue;
     };
   });
 });
