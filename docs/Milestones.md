@@ -137,7 +137,9 @@ should also set the response `res.status(200).json({})`
 ## context.error(error)
 
 This should be called when throwing an error won't work. If you are returning a promise or working sync then throwing
-an error will be better
+an error will be better. If more than one parmeter is passed to `context.error` then this function will assume the
+syntax `context.error(status, message, [errors], [cause])` and will create a new EpilogueError out of them and will use
+that instead.
 
 # Errors
 
@@ -154,36 +156,82 @@ To make use of this you must use an error that extends EpilogueError. Any error 
 EpilogueError will be shown as an Internal Server Error with it's errors array set to the error message.
 
 In situations where throwing an error is not possible you can use `context.error(err)` with the error object or
-alternatively call `context.error(status, message, [errors])` for it to build an EpilogueError for you with the supplied
-parameters
+alternatively call `context.error(status, message, [errors], [cause])` for it to build an EpilogueError for you with the
+supplied parameters
 
 The following errors are provided on epilogue.Errors:
 
-## EpilogueError(statusCode, message, errors)
+## EpilogueError(statusCode, message, errors, cause)
 
 This is the parent class you can extend to make your own errors
 
 `statusCode` = the HTTP status code to return, defaults to 500
 `message` = the error message to show in the message field, defaults to 'EpilogueError'
 `errors` = an array of error strings to show in the message, defaults to []
+`cause` = the original error that caused this error, defaults to undefined (no cause)
 
-## BadRequestError(message, errors)
+## BadRequestError(message, errors, cause)
 
 This returns a HTTP 400 response
 
 `message` = the error message to show in the message field, defaults to 'Bad Request'
 `errors` = an array of error strings to show in the message, defaults to []
+`cause` = the original error that caused this error, defaults to undefined (no cause)
 
-## ForbiddenError(message, errors)
+## ForbiddenError(message, errors, cause)
 
 This returns a HTTP 403 response
 
 `message` = the error message to show in the message field, defaults to 'Forbidden'
 `errors` = an array of error strings to show in the message, defaults to []
+`cause` = the original error that caused this error, defaults to undefined (no cause)
 
-## NotFoundError(message, errors)
+## NotFoundError(message, errors, cause)
 
 This returns a HTTP 404 response
 
 `message` = the error message to show in the message field, defaults to 'Not Found'
 `errors` = an array of error strings to show in the message, defaults to []
+`cause` = the original error that caused this error, defaults to undefined (no cause)
+
+# Overriding Error formatting
+
+You can override how errors are formatted for a milestone by setting the `action.error` function.
+
+For example:
+
+```javascript
+  resource.create.error = function(req, res, error) {
+    res.status(500);
+    res.json({message: 'Internal Error'});
+  }
+```
+
+The error object passed will be an EpilogueError. If the error is wrapping another error (for example a ValidationError
+from Sequelize) the original error can be found at `error.cause`
+
+```javascript
+  resource.create.error = function(req, res, error) {
+    if(error.cause && error.cause instanceof sequelize.ValidationError) {
+      res.status(400);
+      res.json({message: 'Bad Request'});
+    } else {
+      res.status(500);
+      res.json({message: 'Internal Error'});
+    }
+  }
+```
+
+The default implementation is to do the following:
+
+```javascript
+  res.status(err.status);
+  res.json({
+    message: err.message,
+    errors: err.errors
+  });
+```
+
+All Sequelize ValidationError objects are wrapped in a BadRequestError and are accessed on error.cause.
+Any EpilogueError object are passed as-is and any other errors are wrapped in an EpilogueError and can be accessed on
+error.cause
