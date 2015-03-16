@@ -94,6 +94,8 @@ users.list.fetch.before(function(req, res, context) {
 });
 
 // example for 2 and 4
+var ForbiddenError = require('epilogue').Errors.ForbiddenError;
+
 users.list.fetch.before(function(req, res, context) {
 	return checkLoggedIn(function(loggedIn) {
 		if(!loggedIn) {

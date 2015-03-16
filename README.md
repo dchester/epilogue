@@ -64,9 +64,13 @@ Controller actions in turn have hooks for setting and overriding behavior at eac
 We have these milestones to work with: `start`, `auth`, `fetch`, `data`, `write`, `send`, and `complete`.
 
 ```javascript
+var ForbiddenError = require('epilogue').Errors.ForbiddenError;
+
 // disallow deletes on users
 users.delete.auth(function(req, res, context) {
     throw new ForbiddenError("can't delete a user");
+    // optionally:
+    // return context.error(403, "can't delete a user");
 })
 ```
 
@@ -153,6 +157,8 @@ module.exports = {
 To show an error and halt execution of milestone functions you can throw an error:
 
 ```javascript
+var ForbiddenError = require('epilogue').Errors.ForbiddenError;
+
 before: function(req, res, context) {
     return authenticate.then(function(authed) {
         if(!authed) throw new ForbiddenError();
