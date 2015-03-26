@@ -183,20 +183,17 @@ describe('Resource(associations)', function() {
         }
       ];
 
-      var promise = Promise.resolve();
-      testData.forEach(function(entry) {
-        promise.then(function() {
-          return Promise.all([
-            test.models.User.create(entry.user),
-            test.models.Address.create(entry.address)
-          ]).spread(function(user, address) {
-            var expectedResult = entry.user;
-            expectedResult.id = user.id;
-            expectedResult.address = address.dataValues;
-            test.expectedResults.push(expectedResult);
+      return Promise.resolve(testData).each(function(entry) {
+        return Promise.all([
+          test.models.User.create(entry.user),
+          test.models.Address.create(entry.address)
+        ]).spread(function(user, address) {
+          var expectedResult = entry.user;
+          expectedResult.id = user.id;
+          expectedResult.address = address.dataValues;
+          test.expectedResults.push(expectedResult);
 
-            return user.setAddress(address);
-          });
+          return user.setAddress(address);
         });
       });
     });
