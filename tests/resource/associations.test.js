@@ -37,10 +37,26 @@ describe('Resource(associations)', function() {
       timestamps: false
     });
 
+    test.models.Hobby = test.db.define('hobby', {
+      id: { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
+      name: { type: test.Sequelize.STRING }
+    }, {
+      underscored: true,
+      timestamps: false
+    });
+
     test.models.User.belongsTo(test.models.Address);  // user has an address_id
     test.models.Person.belongsTo(test.models.Address, {
       as: 'addy',
       foreignKey: 'addy_id'
+    });
+    test.models.Person.belongsToMany(test.models.Hobby, {
+      as: 'hobbies',
+      through: 'person_hobbies'
+    });
+    test.models.Hobby.belongsToMany(test.models.Person, {
+      as: 'people',
+      through: 'person_hobbies'
     });
   });
 
@@ -67,6 +83,15 @@ describe('Resource(associations)', function() {
           model: test.models.Person,
           include: [{ model: test.models.Address, as: 'addy' }],
           endpoints: ['/people', '/people/:id']
+        });
+
+        rest.resource({
+          model: test.models.Person,
+          include: [
+            { model: test.models.Address, as: 'addy' },
+            { model: test.models.Hobby, as: 'hobbies' }
+          ],
+          endpoints: ['/personWithTwoIncludes', '/personWithTwoIncludes/:id']
         });
 
         rest.resource({
@@ -230,6 +255,62 @@ describe('Resource(associations)', function() {
 
         expect(actual).to.eql(expected);
         done();
+      });
+    });
+
+    it('should include two associations', function(done) {
+      var hobbyRecords = [
+        { name: 'programming' },
+        { name: 'baseball' }
+      ];
+      var records = [
+        {
+          person: { name: 'john' },
+          address: { street: '100 First Street ' }
+        },
+        {
+          person: { name: 'joe' },
+          address: { street: '200 Second Street' }
+        }
+      ];
+      var expectedPerson;
+      var expectedId;
+      Promise.resolve(records).each(function(record) {
+        return Promise.all([
+          test.models.Person.create(record.person),
+          test.models.Address.create(record.address)
+        ]).spread(function(person, address) {
+          return person.setAddy(address);
+        });
+      }).then(function() {
+        return Promise.all([
+          test.models.Hobby.create(hobbyRecords[0]),
+          test.models.Hobby.create(hobbyRecords[1]),
+          test.models.Person.findAll()
+        ]);
+      }).spread(function(hobby0, hobby1, people) {
+        var person = people[0];
+        expectedId = person.id;
+        return person.setHobbies([hobby0, hobby1]);
+      }).then(function(hobbies) {
+        return test.models.Person.find({
+          where: { id: expectedId },
+          include: [
+            { model: test.models.Address, as: 'addy' },
+            { model: test.models.Hobby, as: 'hobbies' }
+          ]
+        });
+      }).then(function(person) {
+        expectedPerson = JSON.parse(JSON.stringify(person.dataValues));
+        delete expectedPerson.addy_id;
+        request.get({
+          url: test.baseUrl + '/personWithTwoIncludes?q=' + expectedPerson.name
+        }, function(error, response, body) {
+          expect(response.statusCode).to.equal(200);
+          body = _.isObject(body) ? body : JSON.parse(body);
+          expect(body[0]).to.eql(expectedPerson);
+          done();
+        });
       });
     });
 
