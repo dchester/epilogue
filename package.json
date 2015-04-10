@@ -1,7 +1,7 @@
 {
   "name": "epilogue",
   "description": "Create REST resources and controllers with Sequelize and Express or Restify",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "author": "David Chester <dchester@shutterstock.com>",
   "contributors": [
     {
@@ -34,20 +34,20 @@
   ],
   "dependencies": {
     "bluebird": "^2.9.2",
-    "lodash": "~3.3.0",
-    "merge-defaults": "~0.2.1",
-    "inflection": "~1.6.0"
+    "lodash": "^3.5.0",
+    "merge-defaults": "^0.2.1",
+    "inflection": "^1.7.0"
   },
   "devDependencies": {
     "sqlite3": "^3.0.5",
     "request": "^2.53.0",
     "express": "^4.11.2",
     "body-parser": "^1.12.0",
-    "restify": "^2.8.5",
+    "restify": "^3.0.1",
     "mocha": "^2.1.0",
     "chai": "^2.0.0",
     "jshint": "^2.6.0",
     "istanbul": "^0.3.6",
-    "sequelize": "git://github.com/sequelize/sequelize#master"
+    "sequelize": "^2.0.5"
   }
 }
