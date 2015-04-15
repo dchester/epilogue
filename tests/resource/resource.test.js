@@ -85,7 +85,7 @@ describe('Resource(basic)', function() {
 
     it('should throw an exception if created with an invalid model', function(done) {
       try {
-        var resource = new rest.Resource();
+        var resource = new rest.Resource(); // jshint ignore:line
       } catch (exception) {
         expect(exception).to.eql(new Error('resource needs a model'));
       }
@@ -159,7 +159,6 @@ describe('Resource(basic)', function() {
         expect(error).is.null;
         expect(response.headers.location).is.not.empty;
 
-        var path = response.headers.location;
         request.post({
           url: test.baseUrl + '/users',
           json: record

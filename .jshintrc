@@ -18,6 +18,9 @@
   "trailing":true,
   "undef":true,
   "esnext":true,
+  "unused":"vars",
+  "nonbsp": true,
+  "maxdepth": 8,
   "globals": {
     "Promise": true
   },
