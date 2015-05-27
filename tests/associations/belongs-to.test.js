@@ -121,12 +121,22 @@ describe('Associations(BelongsTo)', function() {
           postal_code: 'NW1',
           country_code: '44'
         }),
+        test.models.Address.create({
+          street: 'Avenue de l\'Atomium',
+          state_province: 'Brussels',
+          postal_code: '1020',
+          country_code: '32'
+        }),
         test.models.User.create({
           username: 'sherlock',
           email: 'sherlock@holmes.com'
         }),
+        test.models.User.create({
+          username: 'MannekenPis',
+          email: 'manneken.pis@brussels.be'
+        }),
         test.models.Person.create({ name: 'barney' })
-      ]).spread(function(address, user, person) {
+      ]).spread(function(address, address2, user, user2, person) {
         return Promise.all([
           user.setAddress(address),
           person.setAddy(address)
@@ -194,6 +204,25 @@ describe('Associations(BelongsTo)', function() {
           state_province: 'London',
           postal_code: 'NW1',
           country_code: '44'
+        };
+
+        expect(result).to.eql(expected);
+        done();
+      });
+    });
+
+    it('should return associated data by url (2)', function(done) {
+      request.get({
+        url: test.baseUrl + '/users/2/address'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        var expected = {
+          id: 2,
+          street: 'Avenue de l\'Atomium',
+          state_province: 'Brussels',
+          postal_code: '1020',
+          country_code: '32'
         };
 
         expect(result).to.eql(expected);
