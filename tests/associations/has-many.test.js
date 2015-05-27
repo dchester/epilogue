@@ -42,11 +42,15 @@ describe('Associations(HasMany)', function() {
 
         Promise.all([
           test.models.User.create({ name: 'sumo' }),
+          test.models.User.create({ name: 'ninja' }),
           test.models.Task.create({ name: 'eat' }),
           test.models.Task.create({ name: 'sleep' }),
-          test.models.Task.create({ name: 'eat again' })
-        ]).spread(function(user, task1, task2, task3) {
-          return user.setTasks([task1, task2, task3]);
+          test.models.Task.create({ name: 'eat again' }),
+          test.models.Task.create({ name: 'fight' })
+        ]).spread(function(user, user2, task1, task2, task3, task4) {
+          user.setTasks([task1, task2, task3]);
+          user2.setTasks([task4]);
+          return;
         }).then(function() {
           done();
         });
@@ -86,6 +90,20 @@ describe('Associations(HasMany)', function() {
           { id: 1, name: 'eat' },
           { id: 2, name: 'sleep' },
           { id: 3, name: 'eat again' }
+        ]);
+
+        done();
+      });
+    });
+
+    it('should return associated data by url (2)', function(done) {
+      request.get({
+        url: test.baseUrl + '/users/2/tasks'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result).to.eql([
+          { id: 4, name: 'fight' }
         ]);
 
         done();
