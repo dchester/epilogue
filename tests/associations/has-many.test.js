@@ -48,11 +48,11 @@ describe('Associations(HasMany)', function() {
           test.models.Task.create({ name: 'eat again' }),
           test.models.Task.create({ name: 'fight' })
         ]).spread(function(user, user2, task1, task2, task3, task4) {
-          user.setTasks([task1, task2, task3]);
-          user2.setTasks([task4]);
-          return;
-        }).then(function() {
-          done();
+          return user.setTasks([task1, task2, task3]).then(function() {
+            user2.setTasks([task4]).then(function() {
+              done();
+            });
+          });
         });
 
       });

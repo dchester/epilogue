@@ -82,9 +82,9 @@ describe('Associations(HasOne)', function() {
           email: 'manneken.pis@brussels.be'
         })
       ]).spread(function(address, address2, user, user2) {
-        user.setAddress(address);
-        user2.setAddress(address2);
-        return;
+        return user.setAddress(address).then(function() {
+          return user2.setAddress(address2);
+        });
       });
     });
 
