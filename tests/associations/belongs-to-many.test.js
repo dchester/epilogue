@@ -54,6 +54,27 @@ describe('Associations(BelongsToMany)', function() {
     });
   });
 
+  beforeEach(function() {
+    return Promise.all([
+      test.models.Person.create({
+        name: 'Mr 1'
+      }),
+      test.models.Person.create({
+        name: 'Mr 2'
+      }),
+      test.models.Hobby.create({
+        name: 'Azerty'
+      }),
+      test.models.Hobby.create({
+        name: 'Querty'
+      })
+    ]).spread(function(p1, p2, h1, h2) {
+      return p1.setHobbies([h1,h2]).then(function() {
+        return p2.setHobbies([h2]);
+      });
+    });
+  });
+
   afterEach(function(done) {
     test.clearDatabase(function() {
       test.server.close(done);
@@ -62,26 +83,6 @@ describe('Associations(BelongsToMany)', function() {
 
   // TESTS
   describe('list', function() {
-    beforeEach(function() {
-      return Promise.all([
-        test.models.Person.create({
-          name: 'Mr 1'
-        }),
-        test.models.Person.create({
-          name: 'Mr 2'
-        }),
-        test.models.Hobby.create({
-          name: 'Azerty'
-        }),
-        test.models.Hobby.create({
-          name: 'Querty'
-        })
-      ]).spread(function(p1, p2, h1, h2) {
-        return p1.setHobbies([h1,h2]).then(function() {
-          return p2.setHobbies([h2]);
-        });
-      });
-    });
 
     it('should return one record with associated objects', function(done) {
       request.get({
@@ -153,6 +154,34 @@ describe('Associations(BelongsToMany)', function() {
           }]
         }]);
 
+        done();
+      });
+    });
+
+  });
+
+  describe('read', function() {
+
+    it('should return associated data by url', function(done) {
+      request.get({
+        url: test.baseUrl + '/people/1/hobbies/2'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result).to.eql({
+          "id": 2,
+          "name": "Querty"
+        });
+
+        done();
+      });
+    });
+
+    it('should return 404', function(done) {
+      request.get({
+        url: test.baseUrl + '/people/1/hobbies/3'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(404);
         done();
       });
     });
