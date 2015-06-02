@@ -25,6 +25,10 @@ describe('Associations(BelongsToMany)', function() {
       timestamps: false
     });
 
+    test.models.Thing = test.db.define('thing', {
+      name: { type: test.Sequelize.STRING }
+    });
+
     test.models.Person.belongsToMany(test.models.Hobby, {
       as: 'hobbies',
       through: 'person_hobbies'
@@ -32,6 +36,10 @@ describe('Associations(BelongsToMany)', function() {
     test.models.Hobby.belongsToMany(test.models.Person, {
       as: 'people',
       through: 'person_hobbies'
+    });
+    test.models.Thing.belongsToMany(test.models.Person, {
+      as: 'people',
+      through: 'person_thing'
     });
   });
 
@@ -46,6 +54,16 @@ describe('Associations(BelongsToMany)', function() {
         rest.resource({
           model: test.models.Person,
           endpoints: ['/people', '/people/:id'],
+          associations: true
+        });
+
+        rest.resource({
+          model: test.models.Hobby,
+          associations: true
+        });
+
+        rest.resource({
+          model: test.models.Thing,
           associations: true
         });
 
@@ -67,11 +85,16 @@ describe('Associations(BelongsToMany)', function() {
       }),
       test.models.Hobby.create({
         name: 'Querty'
+      }),
+      test.models.Thing.create({
+        name: 'Abc'
       })
-    ]).spread(function(p1, p2, h1, h2) {
-      return p1.setHobbies([h1,h2]).then(function() {
-        return p2.setHobbies([h2]);
-      });
+    ]).spread(function(p1, p2, h1, h2, t1) {
+      return Promise.all([
+        p1.setHobbies([h1,h2]),
+        p2.setHobbies([h2]),
+        t1.setPeople([p1])
+      ]);
     });
   });
 
@@ -154,6 +177,83 @@ describe('Associations(BelongsToMany)', function() {
           }]
         }]);
 
+        done();
+      });
+    });
+
+    it('should return associated data by url (3)', function(done) {
+      request.get({
+        url: test.baseUrl + '/hobbies/1/people'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result).to.eql([{
+          "id": 1,
+          "name": "Mr 1",
+          "hobbies": [{
+              "id": 1,
+              "name": "Azerty"
+            }]
+        }]);
+
+        done();
+      });
+    });
+
+    it('should return associated data by url (4)', function(done) {
+      request.get({
+        url: test.baseUrl + '/hobbies/2/people'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result).to.eql([{
+          "id": 1,
+          "name": "Mr 1",
+          "hobbies": [{
+            "id": 2,
+            "name": "Querty"
+          }]
+        },{
+          "id": 2,
+          "name": "Mr 2",
+          "hobbies": [{
+            "id": 2,
+            "name": "Querty"
+          }]
+        }]);
+
+        done();
+      });
+    });
+
+    it('should return associated data by url (5)', function(done) {
+      request.get({
+        url: test.baseUrl + '/things/1'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result).to.be.an('object');
+        expect(result.id).to.be.eql(1);
+        expect(result.people).to.be.an('array');
+        expect(result.people.length).to.be.eql(1);
+        done();
+      });
+    });
+
+    it('should return 404 for non existent reverse lookup', function(done) {
+      request.get({
+        url: test.baseUrl + '/things/1/people'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(404);
+        done();
+      });
+    });
+
+    it('should return 404 for non existent reverse lookup', function(done) {
+      request.get({
+        url: test.baseUrl + '/people/1/things'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(404);
         done();
       });
     });
