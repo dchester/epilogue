@@ -325,6 +325,12 @@ describe('Resource(associations)', function() {
           postal_code: 'NW1',
           country_code: '44'
         }),
+        test.models.Address.create({
+          street: 'Avenue de l\'Atomium',
+          state_province: 'Brussels',
+          postal_code: '1020',
+          country_code: '32'
+        }),
         test.models.User.create({
           username: 'sherlock',
           email: 'sherlock@holmes.com'
@@ -333,7 +339,7 @@ describe('Resource(associations)', function() {
           username: 'watson',
           email: 'watson@holmes.com'
         })
-      ]).spread(function(address, user, user2) {
+      ]).spread(function(address, address2, user, user2) {
         return user.setAddress(address);
       });
     });
@@ -358,6 +364,34 @@ describe('Resource(associations)', function() {
         var result = _.isObject(body) ? body : JSON.parse(body);
         expect(result.address_id).to.exist;
         expect(result.address_id).to.be.eql(1);
+        done();
+      });
+    });
+
+    it('should include the new associated data', function(done) {
+      request.put({
+        url: test.baseUrl + '/users/1',
+        json: {
+          address_id: 2
+        }
+      }, function(error, response, body) {
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result.address).to.be.an('object');
+        expect(result.address.id).to.be.eql(2);
+        done();
+      });
+    });
+
+    it('should include the new associated data by identifier of object nested', function(done) {
+      request.put({
+        url: test.baseUrl + '/users/1',
+        json: {
+          address: { id: 2 }
+        }
+      }, function(error, response, body) {
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result.address).to.be.an('object');
+        expect(result.address.id).to.be.eql(2);
         done();
       });
     });
