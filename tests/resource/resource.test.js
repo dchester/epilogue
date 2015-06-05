@@ -100,6 +100,28 @@ describe('Resource(basic)', function() {
 
       expect(resource.endpoints).to.eql({ plural: '/people', singular: '/people/:id' });
     });
+
+    it('should always transform includes to be objects with a model property', function() {
+      var modelWithAssociation = test.models.Person = test.db.define('modelWithAssociation', {
+        id: { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true }
+      });
+      modelWithAssociation.belongsTo(test.models.User);
+      var resourceWithIncludeAsObject = rest.resource({
+        model: test.models.Person,
+        endpoints: ['/modelwithincludeobject', '/modelwithincludeobject/:id'],
+        include:[{ model: test.models.User }]
+      });
+
+      expect(resourceWithIncludeAsObject.include).to.eql([{ model: test.models.User }]);
+
+      var resourceWithIncludeAsArray = rest.resource({
+        model: test.models.Person,
+        endpoints: ['/modelwithincludearray', '/modelwithincludearray/:id'],
+        include: [test.models.User]
+      });
+
+      expect(resourceWithIncludeAsArray.include).to.eql([{ model: test.models.User }]);
+    });
   });
 
   describe('create', function() {
