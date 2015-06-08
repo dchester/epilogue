@@ -121,6 +121,13 @@ describe('Resource(basic)', function() {
       });
 
       expect(resourceWithIncludeAsArray.include).to.eql([{ model: test.models.User }]);
+
+      var resourceWithoutInclude = rest.resource({
+        model: test.models.Person,
+        endpoints: ['/modelwithoutinclude', '/modelwithoutinclude/:id']
+      });
+
+      expect(resourceWithoutInclude.include).to.eql([]);
     });
   });
 
