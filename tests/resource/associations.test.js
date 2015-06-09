@@ -396,6 +396,56 @@ describe('Resource(associations)', function() {
       });
     });
 
+    it('should allow updating an association to null by replacing its primary key', function(done) {
+      request.put({
+        url: test.baseUrl + '/users/1',
+        json: {
+          address: { id: 2 }
+        }
+      }, function(error, response, body) {
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result.address).to.be.an('object');
+        expect(result.address.id).to.be.eql(2);
+
+        request.put({
+          url: test.baseUrl + '/users/1',
+          json: {
+            address: { id: null }
+          }
+        }, function(error, response, body) {
+          var result = _.isObject(body) ? body : JSON.parse(body);
+          expect(result.address).to.be.null;
+
+          done();
+        });
+      });
+    });
+
+    it('should allow updating an association with null', function(done) {
+      request.put({
+        url: test.baseUrl + '/users/1',
+        json: {
+          address: { id: 2 }
+        }
+      }, function(error, response, body) {
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result.address).to.be.an('object');
+        expect(result.address.id).to.be.eql(2);
+
+        request.put({
+          url: test.baseUrl + '/users/1',
+          json: {
+            address: null
+          }
+        }, function(error, response, body) {
+          var result = _.isObject(body) ? body : JSON.parse(body);
+          expect(result.address).to.be.null;
+
+          done();
+        });
+      });
+    });
+
   });
 
 });
