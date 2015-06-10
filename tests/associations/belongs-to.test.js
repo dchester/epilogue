@@ -77,6 +77,14 @@ describe('Associations(BelongsTo)', function() {
 
         rest.resource({
           model: test.models.User,
+          endpoints: ['/usersWithoutFK', '/usersWithoutFK/:id'],
+          associations: {
+            removeForeignKeys: true
+          }
+        });
+
+        rest.resource({
+          model: test.models.User,
           endpoints: ['/usersWithoutInclude', '/usersWithoutInclude/:id']
         });
 
@@ -232,6 +240,30 @@ describe('Associations(BelongsTo)', function() {
       });
     });
 
+    it('should include prefetched data without foreign key', function(done) {
+      request.get({
+        url: test.baseUrl + '/usersWithoutFK/1'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        var expected = {
+          id: 1,
+          username: 'sherlock',
+          email: 'sherlock@holmes.com',
+          address: {
+            id: 1,
+            street: '221B Baker Street',
+            state_province: 'London',
+            postal_code: 'NW1',
+            country_code: '44'
+          }
+        };
+
+        expect(result).to.eql(expected);
+        done();
+      });
+    });
+
   });
 
   describe('list', function() {
@@ -366,6 +398,19 @@ describe('Associations(BelongsTo)', function() {
       });
     });
 
+    it('should include prefetched data without foreign key', function(done) {
+      request.get({
+        url: test.baseUrl + '/usersWithoutFK'
+      }, function(error, response, body) {
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result).to.eql(test.expectedResults.map(function(i) {
+          delete i.address_id;
+          return i;
+        }));
+        done();
+      });
+    });
+
   });
 
   describe('update', function() {
@@ -430,6 +475,7 @@ describe('Associations(BelongsTo)', function() {
         var result = _.isObject(body) ? body : JSON.parse(body);
         expect(result.address).to.be.an('object');
         expect(result.address.id).to.be.eql(2);
+        expect(result.address_id).to.be.eql(2);
         done();
       });
     });
@@ -444,6 +490,22 @@ describe('Associations(BelongsTo)', function() {
         var result = _.isObject(body) ? body : JSON.parse(body);
         expect(result.address).to.be.an('object');
         expect(result.address.id).to.be.eql(2);
+        expect(result.address_id).to.be.eql(2);
+        done();
+      });
+    });
+
+    it('should include the new associated data without foreign key', function(done) {
+      request.put({
+        url: test.baseUrl + '/usersWithoutFK/1',
+        json: {
+          address_id: 2
+        }
+      }, function(error, response, body) {
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result.address).to.be.an('object');
+        expect(result.address.id).to.be.eql(2);
+        expect(result).to.not.contain.key('address_id');
         done();
       });
     });
