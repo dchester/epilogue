@@ -154,6 +154,7 @@ describe('Associations(BelongsTo)', function() {
           id: 1,
           username: 'sherlock',
           email: 'sherlock@holmes.com',
+          address_id: 1,
           address: {
             id: 1,
             street: '221B Baker Street',
@@ -178,6 +179,7 @@ describe('Associations(BelongsTo)', function() {
           id: 1,
           name: 'barney',
           hobbies: [],
+          addy_id: 1,
           addy: {
             id: 1,
             street: '221B Baker Street',
@@ -266,6 +268,7 @@ describe('Associations(BelongsTo)', function() {
           var expectedResult = entry.user;
           expectedResult.id = user.id;
           expectedResult.address = address.dataValues;
+          expectedResult.address_id = address.dataValues.id;
           test.expectedResults.push(expectedResult);
 
           return user.setAddress(address);
@@ -352,7 +355,6 @@ describe('Associations(BelongsTo)', function() {
         });
       }).then(function(person) {
         expectedPerson = JSON.parse(JSON.stringify(person.dataValues));
-        delete expectedPerson.addy_id;
         request.get({
           url: test.baseUrl + '/personWithTwoIncludes?q=' + expectedPerson.name
         }, function(error, response, body) {
