@@ -446,6 +446,22 @@ describe('Resource(associations)', function() {
       });
     });
 
+    it('should successfully reload an instance with both 1:1 and m:n relation when the 1:1 relation is changed', function(done) {
+      var personData = { name: 'John Smith' };
+      Promise.all([
+        test.models.Person.create(personData),
+        test.models.Address.create({ street: '123 Main St' })
+      ]).spread(function(person, address) {
+        personData.addy_id = address.id;
+        request.put({
+          url: test.baseUrl + '/personWithTwoIncludes/' + person.id,
+          json: personData
+        }, function(error, response, body) {
+          expect(response.statusCode).to.equal(200);
+          done();
+        });
+      });
+    });
   });
 
 });
