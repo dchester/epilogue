@@ -499,21 +499,6 @@ describe('Resource(associations)', function() {
       });
     });
 
-    it('should have the new associated object to null by identifier of object nested', function(done) {
-      request.post({
-        url: test.baseUrl + '/users',
-        json: {
-          username: 'sherlock'
-        }
-      }, function(error, response, body) {
-        var result = _.isObject(body) ? body : JSON.parse(body);
-        expect(result.username).to.be.eql('sherlock');
-        expect(result.address).to.be.null;
-        expect(result.address_id).to.be.null;
-        done();
-      });
-    });
-
     it('should not include the associated data by identifier of object nested', function(done) {
       request.post({
         url: test.baseUrl + '/usersWithoutInclude',
