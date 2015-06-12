@@ -466,6 +466,13 @@ describe('Resource(associations)', function() {
 
   describe('create', function() {
     beforeEach(function() {
+      rest.resource({
+        model: test.models.User,
+        include: [test.models.Address],
+        endpoints: ['/usersReloadOnCreate', '/usersReloadOnCreate/:id'],
+        reloadOnCreate: true
+      });
+
       return Promise.all([
         test.models.Address.create({
           street: '221B Baker Street',
@@ -492,8 +499,24 @@ describe('Resource(associations)', function() {
       }, function(error, response, body) {
         var result = _.isObject(body) ? body : JSON.parse(body);
         expect(result.username).to.be.eql('sherlock');
-        expect(result.address).to.be.an('object');
+        expect(result).to.not.contain.key('address');
         expect(result.address_id).to.be.eql(2);
+        done();
+      });
+    });
+
+    it('should include the new associated data by identifier of object nested', function(done) {
+      request.post({
+        url: test.baseUrl + '/usersReloadOnCreate',
+        json: {
+          username: 'sherlock',
+          address: { id: 2 }
+        }
+      }, function(error, response, body) {
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result.username).to.be.eql('sherlock');
+        expect(result.address_id).to.be.eql(2);
+        expect(result.address).to.be.an('object');
         expect(result.address.id).to.be.eql(2);
         done();
       });
