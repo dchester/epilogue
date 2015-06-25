@@ -469,8 +469,8 @@ describe('Resource(associations)', function() {
       rest.resource({
         model: test.models.User,
         include: [test.models.Address],
-        endpoints: ['/usersReloadOnCreate', '/usersReloadOnCreate/:id'],
-        reloadOnCreate: true
+        endpoints: ['/usersNotReloadInstances', '/usersNotReloadInstances/:id'],
+        reloadInstances: false
       });
 
       return Promise.all([
@@ -499,15 +499,16 @@ describe('Resource(associations)', function() {
       }, function(error, response, body) {
         var result = _.isObject(body) ? body : JSON.parse(body);
         expect(result.username).to.be.eql('sherlock');
-        expect(result).to.not.contain.key('address');
         expect(result.address_id).to.be.eql(2);
+        expect(result.address).to.be.an('object');
+        expect(result.address.id).to.be.eql(2);
         done();
       });
     });
 
-    it('should include the new associated data by identifier of object nested', function(done) {
+    it('should include the new associated data by identifier of object nested without reload', function(done) {
       request.post({
-        url: test.baseUrl + '/usersReloadOnCreate',
+        url: test.baseUrl + '/usersNotReloadInstances',
         json: {
           username: 'sherlock',
           address: { id: 2 }
@@ -515,9 +516,8 @@ describe('Resource(associations)', function() {
       }, function(error, response, body) {
         var result = _.isObject(body) ? body : JSON.parse(body);
         expect(result.username).to.be.eql('sherlock');
+        expect(result).to.not.contain.key('address');
         expect(result.address_id).to.be.eql(2);
-        expect(result.address).to.be.an('object');
-        expect(result.address.id).to.be.eql(2);
         done();
       });
     });
