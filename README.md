@@ -230,6 +230,19 @@ This would restrict substring searches to the ```username``` attribute of the Us
 $ curl http://localhost/users?searchOnlyUsernames=james
 ```
 
+By default, the substring search is performed using a ```{field} LIKE '%{query}%'``` pattern. However, this behavoir can be customized by specifying a search operator. Valid operators include: `$ne`, `$not`, `$gte`, `$gt`, `$lte`, `$lt`, `$like` (default), `$ilike`/`$iLike`, `$notLike`, `$notILike`. For instance:
+
+```javascript
+var users = rest.resource({
+    model: User,
+    endpoints: ['/users', '/users/:id'],
+    search: {
+      operator: '$gt',
+      attributes: [ 'age' ]
+    }
+});
+```
+
 ### Sorting
 
 Specify the `sort` parameter to sort results.  Values are field names, optionally preceded by a `-` to indicate descending order.  Multiple sort values may be separated by `,`.
