@@ -88,6 +88,32 @@ describe('Resource(search)', function() {
       },
       query: 'william',
       expectedResults: [{ username: 'william', email: 'william@gmail.com' }]
+    },
+    {
+      name: 'with custom search operator',
+      config: {
+        search: {
+          operator: '$eq'
+        }
+      },
+      query: 'william',
+      expectedResults: [{ username: 'william', email: 'william@gmail.com' }]
+    },
+    {
+      name: 'with custom search operator and attributes',
+      config: {
+        search: {
+          operator: '$notLike',
+          attributes: [ 'username' ]
+        }
+      },
+      query: 'william',
+      expectedResults: [
+        { username: 'arthur', email: 'arthur@gmail.com' },
+        { username: 'james', email: 'james@gmail.com' },
+        { username: 'henry', email: 'henry@gmail.com' },
+        { username: 'edward', email: 'edward@gmail.com' },
+        { username: 'arthur', email: 'aaaaarthur@gmail.com' }]
     }
   ].forEach(function(testCase) {
 
