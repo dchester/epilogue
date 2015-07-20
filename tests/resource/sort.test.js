@@ -115,6 +115,48 @@ describe('Resource(sort)', function() {
     });
   });
 
+  it('should sort with default sort criteria', function(done) {
+    rest.resource({
+      model: test.models.User,
+      endpoints: ['/users', '/users/:id'],
+      sort: {
+        default: "email"
+      }
+    });
+
+    request.get({
+      url: test.baseUrl + '/users'
+    }, function(err, response, body) {
+      expect(response.statusCode).to.equal(200);
+      var records = JSON.parse(body).map(function(r) {
+        return _.omit(r, 'id');
+      });
+      expect(records).to.eql(_.sortByAll(test.userlist, ['email']));
+      done();
+    });
+  });
+
+  it('should sort with query overriding default sort criteria', function(done) {
+    rest.resource({
+      model: test.models.User,
+      endpoints: ['/users', '/users/:id'],
+      sort: {
+        default: "-email"
+      }
+    });
+
+    request.get({
+      url: test.baseUrl + '/users?sort=username'
+    }, function(err, response, body) {
+      expect(response.statusCode).to.equal(200);
+      var records = JSON.parse(body).map(function(r) {
+        return _.omit(r, 'id');
+      });
+      expect(records).to.eql(_.sortByAll(test.userlist, ['username']));
+      done();
+    });
+  });
+
   it('should fail sorting with a restricted attribute', function(done) {
     rest.resource({
       model: test.models.User,
