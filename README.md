@@ -283,6 +283,26 @@ This would restrict sorting to only the ```username``` attribute of the User mod
 $ curl http://localhost/users?orderby=username
 ```
 
+Default sort criteria can be defined with the `default` attribute. The expected format for default sort criteria is exactly the same as if it was proceeding the `sort` parameter in the URL.
+
+```javascript
+var users = rest.resource({
+    model: User,
+    endpoints: ['/users', '/users/:id'],
+    sort: {
+      default: '-email,username'
+    }
+});
+```
+With this configuration, these two calls would result in the same data:
+
+```bash
+$ curl http://localhost/users
+$ curl http://localhost/users?sort=-email,username
+```
+
+Note that the `sort` parameter in the URL will override your default criteria.
+
 By default all attributes defined on the model are allowed to be sorted on. Sorting on a attribute not allowed will cause a 400 error to be returned with errors in the format:
 
 ```bash
