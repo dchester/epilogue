@@ -114,6 +114,12 @@ describe('Resource(search)', function() {
         { username: 'henry', email: 'henry@gmail.com' },
         { username: 'edward', email: 'edward@gmail.com' },
         { username: 'arthur', email: 'aaaaarthur@gmail.com' }]
+    },
+    {
+      name: 'in combination with filtered results',
+      config: {},
+      query: 'aaaa&username=arthur',
+      expectedResults: [{ username: 'arthur', email: 'aaaaarthur@gmail.com' }]
     }
   ].forEach(function(testCase) {
 
