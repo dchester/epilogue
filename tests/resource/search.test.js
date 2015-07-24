@@ -120,17 +120,33 @@ describe('Resource(search)', function() {
       config: {},
       query: 'aaaa&username=arthur',
       expectedResults: [{ username: 'arthur', email: 'aaaaarthur@gmail.com' }]
+    },
+    {
+      name: 'with existing search criteria',
+      config: {},
+      preFlight: function(req, res, context) { 
+        context.criteria = { username: "arthur" };
+        return context.continue;
+      },
+      query: '@gmail.com',
+      expectedResults: [
+        { username: 'arthur', email: 'arthur@gmail.com' },
+        { username: 'arthur', email: 'aaaaarthur@gmail.com' }
+      ]
     }
   ].forEach(function(testCase) {
-
     it('should search ' + testCase.name, function(done) {
-      rest.resource(_.extend(testCase.config, {
+      var testResource = rest.resource(_.extend(testCase.config, {
         model: test.models.User,
         endpoints: ['/users', '/users/:id']
       }));
 
       var searchParam =
         testCase.config.search ? testCase.config.search.param || 'q' : 'q';
+
+      if (testCase.preFlight)
+        testResource.list.fetch.before(testCase.preFlight);
+      
       request.get({
         url: test.baseUrl + '/users?' + searchParam + '=' + testCase.query
       }, function(err, response, body) {
