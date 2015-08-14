@@ -36,8 +36,7 @@
   "dependencies": {
     "bluebird": "^2.9.34",
     "inflection": "^1.7.1",
-    "lodash": "^3.10.1",
-    "merge-defaults": "^0.2.1"
+    "lodash": "^3.10.1"
   },
   "devDependencies": {
     "body-parser": "^1.13.3",
