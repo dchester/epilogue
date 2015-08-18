@@ -31,11 +31,13 @@ describe('Associations(BelongsToMany)', function() {
 
     test.models.Person.belongsToMany(test.models.Hobby, {
       as: 'hobbies',
-      through: 'person_hobbies'
+      through: 'person_hobbies',
+      timestamps: false
     });
     test.models.Hobby.belongsToMany(test.models.Person, {
       as: 'people',
-      through: 'person_hobbies'
+      through: 'person_hobbies',
+      timestamps: false
     });
     test.models.Thing.belongsToMany(test.models.Person, {
       as: 'people',
