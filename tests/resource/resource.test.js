@@ -88,9 +88,9 @@ describe('Resource(basic)', function() {
         var resource = new rest.Resource(); // jshint ignore:line
       } catch (exception) {
         expect(exception).to.eql(new Error('resource needs a model'));
+        done();
       }
 
-      done();
     });
 
     it('should auto generate endpoints if none were provided', function() {
@@ -121,6 +121,13 @@ describe('Resource(basic)', function() {
       });
 
       expect(resourceWithIncludeAsArray.include).to.eql([{ model: test.models.User }]);
+
+      var resourceWithoutInclude = rest.resource({
+        model: test.models.Person,
+        endpoints: ['/modelwithoutinclude', '/modelwithoutinclude/:id']
+      });
+
+      expect(resourceWithoutInclude.include).to.eql([]);
     });
   });
 

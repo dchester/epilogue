@@ -5,9 +5,10 @@ var Promise = require('bluebird'),
     expect = require('chai').expect,
     _ = require('lodash'),
     rest = require('../../lib'),
-    test = require('../support');
+    test = require('../support'),
+    Promise = test.Sequelize.Promise;
 
-describe('Resource(associations)', function() {
+describe('Associations(BelongsTo)', function() {
   before(function() {
     test.models.User = test.db.define('users', {
       id: { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
@@ -70,8 +71,16 @@ describe('Resource(associations)', function() {
 
         rest.resource({
           model: test.models.User,
-          include: [test.models.Address],
-          endpoints: ['/users', '/users/:id']
+          endpoints: ['/users', '/users/:id'],
+          associations: true
+        });
+
+        rest.resource({
+          model: test.models.User,
+          endpoints: ['/usersWithoutFK', '/usersWithoutFK/:id'],
+          associations: {
+            removeForeignKeys: true
+          }
         });
 
         rest.resource({
@@ -81,8 +90,8 @@ describe('Resource(associations)', function() {
 
         rest.resource({
           model: test.models.Person,
-          include: [{ model: test.models.Address, as: 'addy' }],
-          endpoints: ['/people', '/people/:id']
+          endpoints: ['/people', '/people/:id'],
+          associations: true
         });
 
         rest.resource({
@@ -120,12 +129,22 @@ describe('Resource(associations)', function() {
           postal_code: 'NW1',
           country_code: '44'
         }),
+        test.models.Address.create({
+          street: 'Avenue de l\'Atomium',
+          state_province: 'Brussels',
+          postal_code: '1020',
+          country_code: '32'
+        }),
         test.models.User.create({
           username: 'sherlock',
           email: 'sherlock@holmes.com'
         }),
+        test.models.User.create({
+          username: 'MannekenPis',
+          email: 'manneken.pis@brussels.be'
+        }),
         test.models.Person.create({ name: 'barney' })
-      ]).spread(function(address, user, person) {
+      ]).spread(function(address, address2, user, user2, person) {
         return Promise.all([
           user.setAddress(address),
           person.setAddy(address)
@@ -133,7 +152,7 @@ describe('Resource(associations)', function() {
       });
     });
 
-    it('should include prefetched data for relations', function(done) {
+    it('should include prefetched data', function(done) {
       request.get({
         url: test.baseUrl + '/users/1'
       }, function(error, response, body) {
@@ -143,6 +162,7 @@ describe('Resource(associations)', function() {
           id: 1,
           username: 'sherlock',
           email: 'sherlock@holmes.com',
+          address_id: 1,
           address: {
             id: 1,
             street: '221B Baker Street',
@@ -166,7 +186,71 @@ describe('Resource(associations)', function() {
         var expected = {
           id: 1,
           name: 'barney',
+          hobbies: [],
+          addy_id: 1,
           addy: {
+            id: 1,
+            street: '221B Baker Street',
+            state_province: 'London',
+            postal_code: 'NW1',
+            country_code: '44'
+          }
+        };
+
+        expect(result).to.eql(expected);
+        done();
+      });
+    });
+
+    it('should return associated data by url', function(done) {
+      request.get({
+        url: test.baseUrl + '/users/1/address'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        var expected = {
+          id: 1,
+          street: '221B Baker Street',
+          state_province: 'London',
+          postal_code: 'NW1',
+          country_code: '44'
+        };
+
+        expect(result).to.eql(expected);
+        done();
+      });
+    });
+
+    it('should return associated data by url (2)', function(done) {
+      request.get({
+        url: test.baseUrl + '/users/2/address'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        var expected = {
+          id: 2,
+          street: 'Avenue de l\'Atomium',
+          state_province: 'Brussels',
+          postal_code: '1020',
+          country_code: '32'
+        };
+
+        expect(result).to.eql(expected);
+        done();
+      });
+    });
+
+    it('should include prefetched data without foreign key', function(done) {
+      request.get({
+        url: test.baseUrl + '/usersWithoutFK/1'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        var expected = {
+          id: 1,
+          username: 'sherlock',
+          email: 'sherlock@holmes.com',
+          address: {
             id: 1,
             street: '221B Baker Street',
             state_province: 'London',
@@ -216,6 +300,7 @@ describe('Resource(associations)', function() {
           var expectedResult = entry.user;
           expectedResult.id = user.id;
           expectedResult.address = address.dataValues;
+          expectedResult.address_id = address.dataValues.id;
           test.expectedResults.push(expectedResult);
 
           return user.setAddress(address);
@@ -227,7 +312,7 @@ describe('Resource(associations)', function() {
       delete test.expectedResults;
     });
 
-    it('should include prefetched data for relations', function(done) {
+    it('should include prefetched data', function(done) {
       request.get({
         url: test.baseUrl + '/users'
       }, function(error, response, body) {
@@ -302,7 +387,6 @@ describe('Resource(associations)', function() {
         });
       }).then(function(person) {
         expectedPerson = JSON.parse(JSON.stringify(person.dataValues));
-        delete expectedPerson.addy_id;
         request.get({
           url: test.baseUrl + '/personWithTwoIncludes?q=' + expectedPerson.name
         }, function(error, response, body) {
@@ -311,6 +395,19 @@ describe('Resource(associations)', function() {
           expect(body[0]).to.eql(expectedPerson);
           done();
         });
+      });
+    });
+
+    it('should include prefetched data without foreign key', function(done) {
+      request.get({
+        url: test.baseUrl + '/usersWithoutFK'
+      }, function(error, response, body) {
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result).to.eql(test.expectedResults.map(function(i) {
+          delete i.address_id;
+          return i;
+        }));
+        done();
       });
     });
 
@@ -378,6 +475,7 @@ describe('Resource(associations)', function() {
         var result = _.isObject(body) ? body : JSON.parse(body);
         expect(result.address).to.be.an('object');
         expect(result.address.id).to.be.eql(2);
+        expect(result.address_id).to.be.eql(2);
         done();
       });
     });
@@ -392,6 +490,22 @@ describe('Resource(associations)', function() {
         var result = _.isObject(body) ? body : JSON.parse(body);
         expect(result.address).to.be.an('object');
         expect(result.address.id).to.be.eql(2);
+        expect(result.address_id).to.be.eql(2);
+        done();
+      });
+    });
+
+    it('should include the new associated data without foreign key', function(done) {
+      request.put({
+        url: test.baseUrl + '/usersWithoutFK/1',
+        json: {
+          address_id: 2
+        }
+      }, function(error, response, body) {
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result.address).to.be.an('object');
+        expect(result.address.id).to.be.eql(2);
+        expect(result).to.not.contain.key('address_id');
         done();
       });
     });
