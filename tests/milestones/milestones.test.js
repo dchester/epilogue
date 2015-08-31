@@ -532,6 +532,31 @@ describe('Milestones', function() {
         });
       });
     });
+
+    it('should support custom options for before fetch', function(done) {
+      var expected = { username: 'jamez' };
+      test.userResource.read.fetch.before(function(req, res, context) {
+        context.options.attributes = ['username'];
+        return context.continue;
+      });
+
+      request.post({
+        url: test.baseUrl + '/users',
+        json: {username: 'jamez', email: 'jamez@gmail.com' }
+      }, function(err, response, body) {
+        expect(err).to.be.null;
+        expect(response.statusCode).to.equal(201);
+
+        var path = response.headers.location;
+        request.get({ url: test.baseUrl + path }, function(err, response, body) {
+          var record = _.isObject(body) ? body : JSON.parse(body);
+          delete record.id;
+          expect(response.statusCode).to.equal(200);
+          expect(record).to.eql(expected);
+          done();
+        });
+      });
+    });
   });
 
   describe('data', function() {
