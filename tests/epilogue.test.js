@@ -1,6 +1,7 @@
 'use strict';
 
-var epilogue = require('../lib'),
+var Sequelize = require('sequelize'),
+    epilogue = require('../lib'),
     expect = require('chai').expect;
 
 describe('Epilogue', function() {
@@ -23,5 +24,20 @@ describe('Epilogue', function() {
       updateMethod: 'dogs'
     })).to.throw('updateMethod must be one of PUT, POST, or PATCH');
     done();
+  });
+
+  it('should allow the user to pass in a sequelize instance rather than prototype', function() {
+    var db = new Sequelize('main', null, null, {
+      dialect: 'sqlite',
+      storage: ':memory:',
+      logging: (process.env.SEQ_LOG ? console.log : false)
+    });
+
+    epilogue.initialize({
+      app: {},
+      sequelize: db
+    });
+
+    expect(epilogue.sequelize.STRING).to.exist;
   });
 });
