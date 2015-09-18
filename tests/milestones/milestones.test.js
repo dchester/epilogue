@@ -565,6 +565,39 @@ describe('Milestones', function() {
 
   describe('write', function() {
     // Write to the database for actions that write, reading from context.attributes.
+
+    it('should support throwing a custom error before write', function(done) {
+      test.userResource.create.write.before(function(req, res, context) {
+        throw new errors.BadRequestError("just fail please");
+      });
+
+      request.post({
+        url: test.baseUrl + '/users',
+        json: { username: 'jamez', email: 'jamez@gmail.com' }
+      }, function(err, response, body) {
+        expect(err).to.be.null;
+        expect(response.statusCode).to.equal(400);
+        expect(response.body.message).to.equal('just fail please');
+        done();
+      });
+    });
+
+    it('should support a custom error in context.error in before write', function(done) {
+      test.userResource.create.write.before(function(req, res, context) {
+        return context.error(new errors.BadRequestError("just fail please"));
+      });
+
+      request.post({
+        url: test.baseUrl + '/users',
+        json: { username: 'jamez', email: 'jamez@gmail.com' }
+      }, function(err, response, body) {
+        expect(err).to.be.null;
+        expect(response.statusCode).to.equal(400);
+        expect(response.body.message).to.equal('just fail please');
+        done();
+      });
+    });
+
   });
 
   describe('send', function() {
