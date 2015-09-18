@@ -5,6 +5,7 @@ var Promise = require('bluebird'),
     expect = require('chai').expect,
     _ = require('lodash'),
     rest = require('../../lib'),
+    errors = rest.Errors,
     test = require('../support');
 
 describe('Resource(basic)', function() {
@@ -129,6 +130,28 @@ describe('Resource(basic)', function() {
 
       expect(resourceWithoutInclude.include).to.eql([]);
     });
+
+    it('should allow the user to override the default error handler', function(done) {
+      test.userResource.controllers.create.error = function(req, res, err) {
+        res.status(418);
+        res.json({ message: "I'm a teapot" });
+      };
+
+      test.userResource.create.write.before(function(req, res, context) {
+        throw new errors.BadRequestError("just fail please");
+      });
+
+      request.post({
+        url: test.baseUrl + '/users',
+        json: { username: 'jamez', email: 'jamez@gmail.com' }
+      }, function(err, response, body) {
+        expect(err).to.be.null;
+        expect(response.statusCode).to.equal(418);
+        expect(response.body.message).to.equal("I'm a teapot");
+        done();
+      });
+    });
+
   });
 
   describe('create', function() {
