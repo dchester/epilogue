@@ -1,6 +1,7 @@
 'use strict';
 
-var request = require('request'),
+var Promise = require('bluebird'),
+    request = require('request'),
     expect = require('chai').expect,
     _ = require('lodash'),
     rest = require('../../lib'),
@@ -24,6 +25,15 @@ describe('Resource(search)', function() {
       timestamps: false
     });
 
+    test.models.Task = test.db.define("task", {
+      name: test.Sequelize.STRING,
+      finished: test.Sequelize.BOOLEAN,
+      priority: test.Sequelize.INTEGER
+    }, {
+      underscored: true,
+      timestamps: false
+    });
+
     test.userlist = [
       { username: 'arthur', email: 'arthur@gmail.com' },
       { username: 'james', email: 'james@gmail.com' },
@@ -31,6 +41,13 @@ describe('Resource(search)', function() {
       { username: 'william', email: 'william@gmail.com' },
       { username: 'edward', email: 'edward@gmail.com' },
       { username: 'arthur', email: 'aaaaarthur@gmail.com' }
+    ];
+
+    test.tasklist = [
+      { name: 'run', finished: true, priority: 2 },
+      { name: 'do laundry', finished: false, priority: 4 },
+      { name: 'wake up', finished: true, priority: 1 },
+      { name: 'eat lunch', finished: false, priority: 3 }
     ];
   });
 
@@ -42,9 +59,11 @@ describe('Resource(search)', function() {
           sequelize: test.Sequelize
         });
 
-        return test.models.User.bulkCreate(test.userlist).then(function() {
-          done();
-        });
+        return Promise.all([
+          test.models.User.bulkCreate(test.userlist),
+          test.models.Task.bulkCreate(test.tasklist)
+        ]).then(function() { done(); });
+
       });
     });
   });
@@ -57,7 +76,7 @@ describe('Resource(search)', function() {
 
   [
     {
-      name: 'with default options',
+      name: 'search with default options',
       config: {},
       query: 'gmail.com',
       expectedResults: [
@@ -70,7 +89,7 @@ describe('Resource(search)', function() {
       ]
     },
     {
-      name: 'with custom search attributes',
+      name: 'search with custom search attributes',
       config: {
         search: {
           attributes: [ 'username' ]
@@ -80,7 +99,7 @@ describe('Resource(search)', function() {
       expectedResults: []
     },
     {
-      name: 'with custom search param',
+      name: 'search with custom search param',
       config: {
         search: {
           param: 'search'
@@ -90,7 +109,7 @@ describe('Resource(search)', function() {
       expectedResults: [{ username: 'william', email: 'william@gmail.com' }]
     },
     {
-      name: 'with custom search operator',
+      name: 'search with custom search operator',
       config: {
         search: {
           operator: '$eq'
@@ -100,7 +119,7 @@ describe('Resource(search)', function() {
       expectedResults: [{ username: 'william', email: 'william@gmail.com' }]
     },
     {
-      name: 'with custom search operator and attributes',
+      name: 'search with custom search operator and attributes',
       config: {
         search: {
           operator: '$notLike',
@@ -116,15 +135,15 @@ describe('Resource(search)', function() {
         { username: 'arthur', email: 'aaaaarthur@gmail.com' }]
     },
     {
-      name: 'in combination with filtered results',
+      name: 'search in combination with filtered results',
       config: {},
       query: 'aaaa&username=arthur',
       expectedResults: [{ username: 'arthur', email: 'aaaaarthur@gmail.com' }]
     },
     {
-      name: 'with existing search criteria',
+      name: 'search with existing search criteria',
       config: {},
-      preFlight: function(req, res, context) { 
+      preFlight: function(req, res, context) {
         context.criteria = { username: "arthur" };
         return context.continue;
       },
@@ -133,22 +152,68 @@ describe('Resource(search)', function() {
         { username: 'arthur', email: 'arthur@gmail.com' },
         { username: 'arthur', email: 'aaaaarthur@gmail.com' }
       ]
+    },
+    {
+      name: 'filter by boolean attribute',
+      config: {
+        model: function() { return test.models.Task; },
+        endpoints: ['/tasks', '/tasks/:id']
+      },
+      extraQuery: 'finished=true',
+      expectedResults: [
+        { name: 'run', finished: true, priority: 2 },
+        { name: 'wake up', finished: true, priority: 1 },
+      ]
+    },
+    {
+      name: 'filter by string attribute',
+      config: {
+        model: function() { return test.models.Task; },
+        endpoints: ['/tasks', '/tasks/:id']
+      },
+      extraQuery: 'name=run',
+      expectedResults: [
+        { name: 'run', finished: true, priority: 2 }
+      ]
+    },
+    {
+      name: 'filter by integer attribute',
+      config: {
+        model: function() { return test.models.Task; },
+        endpoints: ['/tasks', '/tasks/:id']
+      },
+      extraQuery: 'priority=3',
+      expectedResults: [
+        { name: 'eat lunch', finished: false, priority: 3 }
+      ]
     }
   ].forEach(function(testCase) {
-    it('should search ' + testCase.name, function(done) {
-      var testResource = rest.resource(_.extend(testCase.config, {
+    it('should ' + testCase.name, function(done) {
+      if (!!testCase.config.model && _.isFunction(testCase.config.model)) {
+        testCase.config.model = testCase.config.model();
+      }
+
+      var resourceConfig = _.defaults(testCase.config, {
         model: test.models.User,
         endpoints: ['/users', '/users/:id']
-      }));
+      });
 
+      var testResource = rest.resource(resourceConfig);
       var searchParam =
         testCase.config.search ? testCase.config.search.param || 'q' : 'q';
 
+      var queryString = '';
+      if (!!testCase.query) {
+        queryString = searchParam + '=' + testCase.query;
+        if (!!testCase.extraQuery) queryString = queryString + '&';
+      }
+      if (!!testCase.extraQuery) queryString = queryString + testCase.extraQuery;
+
       if (testCase.preFlight)
         testResource.list.fetch.before(testCase.preFlight);
-      
+
       request.get({
-        url: test.baseUrl + '/users?' + searchParam + '=' + testCase.query
+        url: test.baseUrl + resourceConfig.endpoints[0] + '?' + queryString
       }, function(err, response, body) {
         expect(response.statusCode).to.equal(200);
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
