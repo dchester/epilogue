@@ -557,6 +557,31 @@ describe('Milestones', function() {
         });
       });
     });
+
+    it('should respect modified criteria before fetch (aliasing)', function(done) {
+      test.userResource.read.fetch.before(function(req, res, context) {
+        if (req.params.id === 'me') {
+          context.criteria.id = 3;
+        }
+
+        return context.continue;
+      });
+
+      return test.models.User.bulkCreate([
+        { username: 'tom', email: 'tom@gmail.com' },
+        { username: 'dick', email: 'dick@gmail.com' },
+        { username: 'harry', email: 'harry@gmail.com' },
+      ])
+      .then(function() {
+        request.get({ url: test.baseUrl + '/users/me' }, function(err, response, body) {
+          var record = _.isObject(body) ? body : JSON.parse(body);
+          delete record.id;
+          expect(response.statusCode).to.equal(200);
+          expect(record).to.eql({ username: 'harry', email: 'harry@gmail.com' });
+          done();
+        });
+      });
+    });
   });
 
   describe('data', function() {
