@@ -57,6 +57,12 @@ describe('Resource(basic)', function() {
           endpoints: ['/users', '/users/:id']
         });
 
+        test.userResourceWithExclude = rest.resource({
+          model: test.models.User,
+          endpoints: ['/usersWithExclude', '/usersWithExclude/:id'],
+          excludeAttributes: [ 'email' ]
+        });
+
         test.userResource.list.fetch.before(function(req, res, context) {
           if (!!test.userResource.enableCriteriaTest) {
             context.criteria = { id: 1 };
@@ -283,6 +289,23 @@ describe('Resource(basic)', function() {
       });
     });
 
+    it('should honor excludeAttributes', function(done) {
+      request.post({
+        url: test.baseUrl + '/usersWithExclude',
+        json: { username: 'jamez', email: 'jamez@gmail.com' }
+      }, function(error, response, body) {
+        var path = response.headers.location;
+        request.get({
+          url: test.baseUrl + path
+        }, function(err, response, body) {
+          expect(response.statusCode).to.equal(200);
+          var record = _.isObject(body) ? body : JSON.parse(body);
+          expect(record).to.eql({ id: 1, username: 'jamez' });
+          done();
+        });
+      });
+    });
+
   });
 
   describe('update', function() {
@@ -409,6 +432,18 @@ describe('Resource(basic)', function() {
         var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
         expect(records).to.eql(test.userlist);
         expect(response.headers['content-range']).to.equal('items 0-5/6');
+        done();
+      });
+    });
+
+    it('should honor excludeAttributes', function(done) {
+      request.get({
+        url: test.baseUrl + '/usersWithExclude?username=henry'
+      }, function(err, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
+        expect(records).to.have.length(1);
+        expect(records[0]).to.eql({ username: 'henry' });
         done();
       });
     });

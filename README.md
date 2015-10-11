@@ -394,7 +394,11 @@ Create a resource and CRUD actions given a Sequelize model and endpoints.  Accep
 > ###### actions
 >
 > Create only the specified list of actions for the resource.  Options include `create`, `list`, `read`, `update`, and `delete`.  Defaults to all.
-
+>
+> ###### excludeAttributes
+>
+> Explicitly remove the specified list of attributes from read and list operations
+>
 
 ### Milestones & Context
 
