@@ -19,6 +19,15 @@ describe('Associations(BelongsTo)', function() {
       timestamps: false
     });
 
+    test.models.Yuppie = test.db.define('yuppies', {
+      id: { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
+      username: { type: test.Sequelize.STRING, unique: true },
+      email: { type: test.Sequelize.STRING, unique: true, validate: { isEmail: true } }
+    }, {
+      underscored: true,
+      timestamps: false
+    });
+
     test.models.Address = test.db.define('addresses', {
       id: { type: test.Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
       street: { type: test.Sequelize.STRING },
@@ -45,6 +54,13 @@ describe('Associations(BelongsTo)', function() {
       underscored: true,
       timestamps: false
     });
+
+    // Yuppies have two addresses
+    test.models.Yuppie.belongsTo(test.models.Address, {
+      as: 'address2',
+      foreignKey: 'address2_id'
+    });
+    test.models.Yuppie.belongsTo(test.models.Address);
 
     test.models.User.belongsTo(test.models.Address);  // user has an address_id
     test.models.Person.belongsTo(test.models.Address, {
@@ -91,6 +107,12 @@ describe('Associations(BelongsTo)', function() {
         rest.resource({
           model: test.models.Person,
           endpoints: ['/people', '/people/:id'],
+          associations: true
+        });
+
+        rest.resource({
+          model: test.models.Yuppie,
+          endpoints: ['/yuppies', '/yuppies/:id'],
           associations: true
         });
 
@@ -415,19 +437,24 @@ describe('Associations(BelongsTo)', function() {
 
   describe('update', function() {
     beforeEach(function() {
-      return Promise.all([
-        test.models.Address.create({
+      test.addresses = [
+        {
           street: '221B Baker Street',
           state_province: 'London',
           postal_code: 'NW1',
           country_code: '44'
-        }),
-        test.models.Address.create({
+        },
+        {
           street: 'Avenue de l\'Atomium',
           state_province: 'Brussels',
           postal_code: '1020',
           country_code: '32'
-        }),
+        }
+      ];
+
+      return Promise.all([
+        test.models.Address.create(test.addresses[0]),
+        test.models.Address.create(test.addresses[1]),
         test.models.User.create({
           username: 'sherlock',
           email: 'sherlock@holmes.com'
@@ -435,9 +462,18 @@ describe('Associations(BelongsTo)', function() {
         test.models.User.create({
           username: 'watson',
           email: 'watson@holmes.com'
+        }),
+        test.models.Yuppie.create({
+          username: 'richguy',
+          email: 'lotsof@money.com'
         })
-      ]).spread(function(address, address2, user, user2) {
-        return user.setAddress(address);
+      ]).spread(function(address, address2, user, user2, yuppie) {
+        test.addresses[0].id = address.id;
+        test.addresses[1].id = address2.id;
+        return Promise.all([
+          user.setAddress(address),
+          yuppie.setAddress(address)
+        ]);
       });
     });
 
@@ -465,6 +501,21 @@ describe('Associations(BelongsTo)', function() {
       });
     });
 
+    it('should include the new associated data with multiple references to the same model', function(done) {
+      request.put({
+        url: test.baseUrl + '/yuppies/1',
+        json: {
+          address_id: 2
+        }
+      }, function(error, response, body) {
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result.address).to.be.an('object');
+        expect(result.address_id).to.be.eql(2);
+        expect(result.address).to.eql(test.addresses[1]);
+        done();
+      });
+    });
+
     it('should include the new associated data', function(done) {
       request.put({
         url: test.baseUrl + '/users/1',
@@ -475,7 +526,7 @@ describe('Associations(BelongsTo)', function() {
         var result = _.isObject(body) ? body : JSON.parse(body);
         expect(result.address).to.be.an('object');
         expect(result.address.id).to.be.eql(2);
-        expect(result.address_id).to.be.eql(2);
+        expect(result.address).to.eql(test.addresses[1]);
         done();
       });
     });
