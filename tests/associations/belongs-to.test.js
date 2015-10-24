@@ -85,7 +85,7 @@ describe('Associations(BelongsTo)', function() {
           sequelize: test.Sequelize
         });
 
-        rest.resource({
+        test.usersResource = rest.resource({
           model: test.models.User,
           endpoints: ['/users', '/users/:id'],
           associations: true
@@ -195,6 +195,32 @@ describe('Associations(BelongsTo)', function() {
         };
 
         expect(result).to.eql(expected);
+        done();
+      });
+    });
+
+    it('should include prefetched data without foreign keys', function(done) {
+      test.usersResource.associationOptions.removeForeignKeys = true;
+      request.get({
+        url: test.baseUrl + '/users/1'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        var expected = {
+          id: 1,
+          username: 'sherlock',
+          email: 'sherlock@holmes.com',
+          address: {
+            id: 1,
+            street: '221B Baker Street',
+            state_province: 'London',
+            postal_code: 'NW1',
+            country_code: '44'
+          }
+        };
+
+        expect(result).to.eql(expected);
+        test.usersResource.associationOptions.removeForeignKeys = false;
         done();
       });
     });

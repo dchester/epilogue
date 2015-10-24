@@ -40,7 +40,7 @@ describe('Associations(HasOne)', function() {
           sequelize: test.Sequelize
         });
 
-        rest.resource({
+        test.resource = rest.resource({
           model: test.models.User,
           endpoints: ['/users', '/users/:id'],
           associations: true
@@ -99,10 +99,32 @@ describe('Associations(HasOne)', function() {
           street: '221B Baker Street',
           state_province: 'London',
           postal_code: 'NW1',
+          country_code: '44',
+          user_id: 1
+        };
+
+        expect(result).to.eql(expected);
+        done();
+      });
+    });
+
+    it('should return associated data by url without foreign keys', function(done) {
+      test.resource.associationOptions.removeForeignKeys = true;
+      request.get({
+        url: test.baseUrl + '/users/1/address'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        var expected = {
+          id: 1,
+          street: '221B Baker Street',
+          state_province: 'London',
+          postal_code: 'NW1',
           country_code: '44'
         };
 
         expect(result).to.eql(expected);
+        test.resource.associationOptions.removeForeignKeys = false;
         done();
       });
     });
@@ -118,10 +140,32 @@ describe('Associations(HasOne)', function() {
           street: 'Avenue de l\'Atomium',
           state_province: 'Brussels',
           postal_code: '1020',
+          country_code: '32',
+          user_id: 2
+        };
+
+        expect(result).to.eql(expected);
+        done();
+      });
+    });
+
+    it('should return associated data by url without foreign keys (2)', function(done) {
+      test.resource.associationOptions.removeForeignKeys = true;
+      request.get({
+        url: test.baseUrl + '/users/2/address'
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        var expected = {
+          id: 2,
+          street: 'Avenue de l\'Atomium',
+          state_province: 'Brussels',
+          postal_code: '1020',
           country_code: '32'
         };
 
         expect(result).to.eql(expected);
+        test.resource.associationOptions.removeForeignKeys = false;
         done();
       });
     });
