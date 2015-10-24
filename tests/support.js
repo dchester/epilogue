@@ -1,6 +1,7 @@
 'use strict';
 
-var Sequelize = require('sequelize'),
+var Promise = require('bluebird'),
+    Sequelize = require('sequelize'),
     http = require('http'),
     express = require('express'),
     bodyParser = require('body-parser'),
@@ -11,15 +12,11 @@ var TestFixture = {
   models: {},
   Sequelize: Sequelize,
 
-  initializeDatabase: function(callback) {
-    TestFixture.db
-      .sync({ force: true })
-      .then(function() {
-        callback();
-      });
+  initializeDatabase: function() {
+    return TestFixture.db.sync({ force: true });
   },
 
-  initializeServer: function(callback) {
+  initializeServer: function() {
     if (process.env.USE_RESTIFY) {
       TestFixture.server = TestFixture.app = restify.createServer();
       TestFixture.server.use(restify.queryParser());
@@ -31,20 +28,28 @@ var TestFixture = {
       TestFixture.server = http.createServer(TestFixture.app);
     }
 
-    TestFixture.server.listen(0, '127.0.0.1', function() {
-      TestFixture.baseUrl =
-        'http://' + TestFixture.server.address().address + ':' + TestFixture.server.address().port;
-      callback();
+    return new Promise(function(resolve, reject) {
+      TestFixture.server.listen(0, '127.0.0.1', function() {
+        TestFixture.baseUrl =
+          'http://' + TestFixture.server.address().address + ':' + TestFixture.server.address().port;
+        resolve();
+      });
     });
   },
 
-  clearDatabase: function(callback) {
-    TestFixture.db
+  clearDatabase: function() {
+    return TestFixture.db
       .getQueryInterface()
-      .dropAllTables()
-      .then(function() {
-        callback();
+      .dropAllTables();
+  },
+
+  closeServer: function() {
+    return new Promise(function(resolve, reject) {
+      TestFixture.server.close(function(err) {
+        if (!!err) return reject(err);
+        resolve();
       });
+    });
   }
 };
 

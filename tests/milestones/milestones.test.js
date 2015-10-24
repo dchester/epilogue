@@ -22,9 +22,9 @@ describe('Milestones', function() {
     });
   });
 
-  beforeEach(function(done) {
-    test.initializeDatabase(function() {
-      test.initializeServer(function() {
+  beforeEach(function() {
+    return Promise.all([ test.initializeDatabase(), test.initializeServer() ])
+      .then(function() {
         rest.initialize({
           app: test.app,
           sequelize: test.Sequelize
@@ -34,19 +34,15 @@ describe('Milestones', function() {
           model: test.models.User,
           endpoints: ['/users', '/users/:id']
         });
-
-        done();
       });
-    });
   });
 
-  afterEach(function(done) {
-    test.clearDatabase(function() {
-      test.server.close(function() {
+  afterEach(function() {
+    return test.clearDatabase()
+      .then(function() { return test.closeServer(); })
+      .then(function() {
         delete test.userResource;
-        done();
       });
-    });
   });
 
   // TESTS

@@ -15,9 +15,9 @@ describe('issue 107', function() {
     test.models.AdSlot.belongsTo(test.models.Channel);
   });
 
-  beforeEach(function(done) {
-    test.initializeDatabase(function() {
-      test.initializeServer(function() {
+  beforeEach(function() {
+    return Promise.all([ test.initializeDatabase(), test.initializeServer() ])
+      .then(function() {
         rest.initialize({ app: test.app, sequelize: test.Sequelize });
 
         test.channelResource = rest.resource({
@@ -35,14 +35,13 @@ describe('issue 107', function() {
             return Promise.all([
               channel.setAdSlots([ ad ]), ad.setChannel(channel)
             ]);
-          })
-          .then(function() { done(); });
+          });
       });
-    });
   });
 
-  afterEach(function(done) {
-    test.clearDatabase(function() { test.server.close(done); });
+  afterEach(function() {
+    return test.clearDatabase()
+      .then(function() { return test.closeServer(); });
   });
 
   it('list should work', function(done) {

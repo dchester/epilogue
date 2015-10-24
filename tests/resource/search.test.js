@@ -51,27 +51,20 @@ describe('Resource(search)', function() {
     ];
   });
 
-  beforeEach(function(done) {
-    test.initializeDatabase(function() {
-      test.initializeServer(function() {
-        rest.initialize({
-          app: test.app,
-          sequelize: test.Sequelize
-        });
-
+  beforeEach(function() {
+    return Promise.all([ test.initializeDatabase(), test.initializeServer() ])
+      .then(function() {
+        rest.initialize({ app: test.app, sequelize: test.Sequelize });
         return Promise.all([
           test.models.User.bulkCreate(test.userlist),
           test.models.Task.bulkCreate(test.tasklist)
-        ]).then(function() { done(); });
-
+        ]);
       });
-    });
   });
 
-  afterEach(function(done) {
-    test.clearDatabase(function() {
-      test.server.close(done);
-    });
+  afterEach(function() {
+    return test.clearDatabase()
+      .then(function() { return test.closeServer(); });
   });
 
   [

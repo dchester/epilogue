@@ -1,11 +1,11 @@
 'use strict';
 
-var request = require('request'),
+var Promise = require('bluebird'),
+    request = require('request'),
     expect = require('chai').expect,
     _ = require('lodash'),
     rest = require('../../lib'),
-    test = require('../support'),
-    Promise = test.Sequelize.Promise;
+    test = require('../support');
 
 describe('Associations(HasMany)', function() {
   before(function() {
@@ -26,9 +26,9 @@ describe('Associations(HasMany)', function() {
     test.models.User.hasMany(test.models.Task);
   });
 
-  beforeEach(function(done) {
-    test.initializeDatabase(function() {
-      test.initializeServer(function() {
+  beforeEach(function() {
+    return Promise.all([ test.initializeDatabase(), test.initializeServer() ])
+      .then(function() {
         rest.initialize({
           app: test.app,
           sequelize: test.Sequelize
@@ -40,7 +40,7 @@ describe('Associations(HasMany)', function() {
           associations: true
         });
 
-        Promise.all([
+        return Promise.all([
           test.models.User.create({ name: 'sumo' }),
           test.models.User.create({ name: 'ninja' }),
           test.models.Task.create({ name: 'eat' }),
@@ -48,21 +48,17 @@ describe('Associations(HasMany)', function() {
           test.models.Task.create({ name: 'eat again' }),
           test.models.Task.create({ name: 'fight' })
         ]).spread(function(user, user2, task1, task2, task3, task4) {
-          return user.setTasks([task1, task2, task3]).then(function() {
-            user2.setTasks([task4]).then(function() {
-              done();
-            });
-          });
+          return Promise.all([
+            user.setTasks([task1, task2, task3]),
+            user2.setTasks([task4])
+          ]);
         });
-
       });
-    });
   });
 
-  afterEach(function(done) {
-    test.clearDatabase(function() {
-      test.server.close(done);
-    });
+  afterEach(function() {
+    return test.clearDatabase()
+      .then(function() { return test.closeServer(); });
   });
 
   // TESTS

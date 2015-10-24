@@ -1,6 +1,7 @@
 'use strict';
 
-var request = require('request'),
+var Promise = require('bluebird'),
+    request = require('request'),
     expect = require('chai').expect,
     _ = require('lodash'),
     rest = require('../../lib'),
@@ -40,14 +41,10 @@ describe('Resource(pagination)', function() {
 
     describe('list ' + suite.name, function() {
 
-      before(function(done) {
-        test.initializeDatabase(function() {
-          test.initializeServer(function() {
-            rest.initialize({
-              app: test.app,
-              sequelize: test.Sequelize
-            });
-
+      before(function() {
+        return Promise.all([ test.initializeDatabase(), test.initializeServer() ])
+          .then(function() {
+            rest.initialize({ app: test.app, sequelize: test.Sequelize });
             rest.resource(_.extend(suite.configuration, {
               model: test.models.User,
               endpoints: ['/users', '/users/:id']
@@ -61,17 +58,13 @@ describe('Resource(pagination)', function() {
               { username: 'edward', email: 'edward@gmail.com' }
             ];
 
-            return test.models.User.bulkCreate(test.userlist).then(function() {
-              done();
-            });
+            return test.models.User.bulkCreate(test.userlist);
           });
-        });
       });
 
-      after(function(done) {
-        test.clearDatabase(function() {
-          test.server.close(done);
-        });
+      after(function() {
+        return test.clearDatabase()
+          .then(function() { test.closeServer(); });
       });
 
       it('should list records with no criteria', function(done) {

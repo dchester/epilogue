@@ -44,14 +44,10 @@ describe('Resource(basic)', function() {
     });
   });
 
-  beforeEach(function(done) {
-    test.initializeDatabase(function() {
-      test.initializeServer(function() {
-        rest.initialize({
-          app: test.app,
-          sequelize: test.Sequelize
-        });
-
+  beforeEach(function() {
+    return Promise.all([ test.initializeDatabase(), test.initializeServer() ])
+      .then(function() {
+        rest.initialize({ app: test.app, sequelize: test.Sequelize });
         test.userResource = rest.resource({
           model: test.models.User,
           endpoints: ['/users', '/users/:id']
@@ -71,16 +67,12 @@ describe('Resource(basic)', function() {
 
           return context.continue;
         });
-
-        done();
       });
-    });
   });
 
-  afterEach(function(done) {
-    test.clearDatabase(function() {
-      test.server.close(done);
-    });
+  afterEach(function() {
+    return test.clearDatabase()
+      .then(function() { test.closeServer(); });
   });
 
   // TESTS

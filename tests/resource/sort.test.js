@@ -1,6 +1,7 @@
 'use strict';
 
-var request = require('request'),
+var Promise = require('bluebird'),
+    request = require('request'),
     expect = require('chai').expect,
     _ = require('lodash'),
     rest = require('../../lib'),
@@ -34,25 +35,17 @@ describe('Resource(sort)', function() {
     ];
   });
 
-  beforeEach(function(done) {
-    test.initializeDatabase(function() {
-      test.initializeServer(function() {
-        rest.initialize({
-          app: test.app,
-          sequelize: test.Sequelize
-        });
-
-        return test.models.User.bulkCreate(test.userlist).then(function() {
-          done();
-        });
+  beforeEach(function() {
+    return Promise.all([ test.initializeDatabase(), test.initializeServer() ])
+      .then(function() {
+        rest.initialize({ app: test.app, sequelize: test.Sequelize });
+        return test.models.User.bulkCreate(test.userlist);
       });
-    });
   });
 
-  afterEach(function(done) {
-    test.clearDatabase(function() {
-      test.server.close(done);
-    });
+  afterEach(function() {
+    return test.clearDatabase()
+      .then(function() { return test.closeServer(); });
   });
 
   it('should sort with default options', function(done) {

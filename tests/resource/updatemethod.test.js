@@ -1,6 +1,7 @@
 'use strict';
 
-var request = require('request'),
+var Promise = require('bluebird'),
+    request = require('request'),
     expect = require('chai').expect,
     _ = require('lodash'),
     rest = require('../../lib'),
@@ -18,16 +19,13 @@ describe('Resource(updateMethod)', function() {
     });
   });
 
-  beforeEach(function(done) {
-    test.initializeDatabase(function() {
-      test.initializeServer(done);
-    });
+  beforeEach(function() {
+    return Promise.all([ test.initializeDatabase(), test.initializeServer() ]);
   });
 
-  afterEach(function(done) {
-    test.clearDatabase(function() {
-      test.server.close(done);
-    });
+  afterEach(function() {
+    return test.clearDatabase()
+      .then(function() { return test.closeServer(); });
   });
 
   // TESTS

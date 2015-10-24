@@ -1,11 +1,11 @@
 'use strict';
 
-var request = require('request'),
+var Promise = require('bluebird'),
+    request = require('request'),
     expect = require('chai').expect,
     _ = require('lodash'),
     rest = require('../../lib'),
-    test = require('../support'),
-    Promise = test.Sequelize.Promise;
+    test = require('../support');
 
 describe('Associations(HasOne)', function() {
   before(function() {
@@ -32,9 +32,9 @@ describe('Associations(HasOne)', function() {
     test.models.User.hasOne(test.models.Address);
   });
 
-  beforeEach(function(done) {
-    test.initializeDatabase(function() {
-      test.initializeServer(function() {
+  beforeEach(function() {
+    return Promise.all([ test.initializeDatabase(), test.initializeServer() ])
+      .then(function() {
         rest.initialize({
           app: test.app,
           sequelize: test.Sequelize
@@ -45,16 +45,12 @@ describe('Associations(HasOne)', function() {
           endpoints: ['/users', '/users/:id'],
           associations: true
         });
-
-        done();
       });
-    });
   });
 
-  afterEach(function(done) {
-    test.clearDatabase(function() {
-      test.server.close(done);
-    });
+  afterEach(function() {
+    return test.clearDatabase()
+      .then(function() { return test.closeServer(); });
   });
 
   // TESTS

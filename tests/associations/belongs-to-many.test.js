@@ -45,9 +45,9 @@ describe('Associations(BelongsToMany)', function() {
     });
   });
 
-  beforeEach(function(done) {
-    test.initializeDatabase(function() {
-      test.initializeServer(function() {
+  beforeEach(function() {
+    return Promise.all([ test.initializeDatabase(), test.initializeServer() ])
+      .then(function() {
         rest.initialize({
           app: test.app,
           sequelize: test.Sequelize
@@ -68,30 +68,18 @@ describe('Associations(BelongsToMany)', function() {
           model: test.models.Thing,
           associations: true
         });
-
-        done();
       });
-    });
   });
 
   beforeEach(function() {
     return Promise.all([
-      test.models.Person.create({
-        name: 'Mr 1'
-      }),
-      test.models.Person.create({
-        name: 'Mr 2'
-      }),
-      test.models.Hobby.create({
-        name: 'Azerty'
-      }),
-      test.models.Hobby.create({
-        name: 'Querty'
-      }),
-      test.models.Thing.create({
-        name: 'Abc'
-      })
-    ]).spread(function(p1, p2, h1, h2, t1) {
+      test.models.Person.create({ name: 'Mr 1' }),
+      test.models.Person.create({ name: 'Mr 2' }),
+      test.models.Hobby.create({ name: 'Azerty' }),
+      test.models.Hobby.create({ name: 'Querty' }),
+      test.models.Thing.create({ name: 'Abc' })
+    ])
+    .spread(function(p1, p2, h1, h2, t1) {
       return Promise.all([
         p1.setHobbies([h1,h2]),
         p2.setHobbies([h2]),
@@ -100,10 +88,9 @@ describe('Associations(BelongsToMany)', function() {
     });
   });
 
-  afterEach(function(done) {
-    test.clearDatabase(function() {
-      test.server.close(done);
-    });
+  afterEach(function() {
+    return test.clearDatabase()
+      .then(function() { return test.closeServer(); });
   });
 
   // TESTS
