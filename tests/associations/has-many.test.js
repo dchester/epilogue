@@ -16,6 +16,13 @@ describe('Associations(HasMany)', function() {
       timestamps: false
     });
 
+    test.models.App = test.db.define('apps', {
+      name: test.Sequelize.STRING
+    }, {
+      underscored: true,
+      timestamps: false
+    });
+
     test.models.Task = test.db.define('tasks', {
       name: test.Sequelize.STRING
     }, {
@@ -24,6 +31,8 @@ describe('Associations(HasMany)', function() {
     });
 
     test.models.User.hasMany(test.models.Task);
+    test.models.App.hasMany(test.models.User);
+    test.models.User.belongsTo(test.models.App);
   });
 
   beforeEach(function() {
