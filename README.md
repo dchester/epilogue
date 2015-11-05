@@ -246,7 +246,7 @@ This would restrict substring searches to the ```username``` attribute of the Us
 $ curl http://localhost/users?searchOnlyUsernames=james
 ```
 
-By default, the substring search is performed using a ```{field} LIKE '%{query}%'``` pattern. However, this behavoir can be customized by specifying a search operator. Valid operators include: `$ne`, `$not`, `$gte`, `$gt`, `$lte`, `$lt`, `$like` (default), `$ilike`/`$iLike`, `$notLike`, `$notILike`. For instance:
+By default, the substring search is performed using a ```{field} LIKE '%{query}%'``` pattern. However, this behavior can be customized by specifying a search operator. Valid operators include: `$like` (default), `$ilike`/`$iLike`, `$notLike`, `$notILike`, `$ne`, `$not`, `$gte`, `$gt`, `$lte`, `$lt`. All "\*like" operators can only be used against Sequelize.STRING or Sequelize.TEXT fields. For instance:
 
 ```javascript
 var users = rest.resource({
