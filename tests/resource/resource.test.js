@@ -164,6 +164,29 @@ describe('Resource(basic)', function() {
       });
     });
 
+    it('should reload instance on create', function(done) {
+      request.post({
+        url: test.baseUrl + '/users',
+        json: { username: 'arthur', email: 'arthur@gmail.com' }
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(201);
+        expect(response.headers.location).to.match(/\/users\/\d+/);
+        expect(body).to.eql({ id: 1, username: 'arthur', email: 'arthur@gmail.com' });
+        done();
+      });
+    });
+
+    it('should reload instance on create, excluding selected attributes', function(done) {
+      request.post({
+        url: test.baseUrl + '/usersWithExclude',
+        json: { username: 'arthur', email: 'arthur@gmail.com' }
+      }, function(error, response, body) {
+        expect(response.statusCode).to.equal(201);
+        expect(response.headers.location).to.match(/\/usersWithExclude\/\d+/);
+        expect(body).to.eql({ id: 1, username: 'arthur' });
+        done();
+      });
+    });
 
     [
       {
