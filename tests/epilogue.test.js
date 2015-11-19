@@ -17,10 +17,18 @@ describe('Epilogue', function() {
     done();
   });
 
-  it('should throw an exception with an invalid updateMethod', function(done) {
+  it('should throw an exception when initialized with an invalid sequelize instance', function(done) {
     expect(epilogue.initialize.bind(epilogue, {
       app: {},
       sequelize: {},
+    })).to.throw('invalid sequelize instance');
+    done();
+  });
+
+  it('should throw an exception with an invalid updateMethod', function(done) {
+    expect(epilogue.initialize.bind(epilogue, {
+      app: {},
+      sequelize: {version: 0, STRING:0, TEXT:0, and: 0, or: 0},
       updateMethod: 'dogs'
     })).to.throw('updateMethod must be one of PUT, POST, or PATCH');
     done();
@@ -38,6 +46,10 @@ describe('Epilogue', function() {
       sequelize: db
     });
 
+    // required sequelize parameters for the list searching
     expect(epilogue.sequelize.STRING).to.exist;
+    expect(epilogue.sequelize.TEXT).to.exist;
+    expect(epilogue.sequelize.and).to.exist;
+    expect(epilogue.sequelize.or).to.exist;
   });
 });
