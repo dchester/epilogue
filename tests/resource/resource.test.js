@@ -59,6 +59,12 @@ describe('Resource(basic)', function() {
           excludeAttributes: [ 'email' ]
         });
 
+        test.userResourceWithReadOnly = rest.resource({
+          model: test.models.User,
+          endpoints: ['/usersWithReadOnly', '/usersWithReadOnly/:id'],
+          readOnlyAttributes: [ 'email' ]
+        });
+
         test.userResource.list.fetch.before(function(req, res, context) {
           if (!!test.userResource.enableCriteriaTest) {
             context.criteria = { id: 1 };
@@ -245,6 +251,19 @@ describe('Resource(basic)', function() {
       });
     });
 
+    it('should not change readOnlyAttribute', function(done) {
+      request.post({
+        url: test.baseUrl + '/usersWithReadOnly',
+        json: { username: 'jamez', email: 'jamez@gmail.com' }
+      }, function(error, response, body) {
+        expect(error).is.null;
+        expect(response.statusCode).to.equal(201);
+        var record = _.isObject(body) ? body : JSON.parse(body);
+        expect(record.email).to.eql(null);
+        done();
+      });
+    });
+
   });
 
   describe('read', function() {
@@ -360,6 +379,29 @@ describe('Resource(basic)', function() {
         });
       });
     });
+
+    it('should not update a readOnlyAttribute', function(done) {
+      request.post({
+        url: test.baseUrl + '/usersWithReadOnly',
+        json: { username: 'satyajeet', email: 'luckypur@gmail.com' }
+      }, function(error, response, body) {
+        expect(error).is.null;
+        expect(response.headers.location).is.not.empty;
+
+        var path = response.headers.location;
+        request.put({
+          url: test.baseUrl + path,
+          json: { email: 'luckypur@gmail.com' }
+        }, function(error, response, body) {
+          expect(error).is.null;
+          expect(response.statusCode).to.equal(200);
+          var record = _.isObject(body) ? body : JSON.parse(body);
+          expect(record.email).to.eql(null);
+          done();
+        });
+      });
+    });
+
   });
 
   describe('delete', function() {
