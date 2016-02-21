@@ -125,7 +125,7 @@ users.list.fetch.before(function(req, res, context) {
 
 ## context.continue
 
-This says to contiue on to the next hook in the chain.
+This says to continue on to the next hook in the chain.
 
 ## context.skip
 
@@ -139,7 +139,7 @@ should also set the response `res.status(200).json({})`
 ## context.error(error)
 
 This should be called when throwing an error won't work. If you are returning a promise or working sync then throwing
-an error will be better. If more than one parmeter is passed to `context.error` then this function will assume the
+an error will be better. If more than one parameter is passed to `context.error` then this function will assume the
 syntax `context.error(status, message, [errors], [cause])` and will create a new EpilogueError out of them and will use
 that instead.
 
