@@ -402,7 +402,69 @@ Create a resource and CRUD actions given a Sequelize model and endpoints.  Accep
 
 ### Milestones & Context
 
-Check out the [Milestone docs](/docs/Milestones.md)
+Check out the [Milestone docs](/docs/Milestones.md) for information on lifecycle
+hooks that can be used with epilogue resources, and how to run custom code at
+various points during a request.
+
+## Protecting Epilogue REST Endpoints
+
+To protect an endpoint, you must use [milestones](/docs/Milestones.md).
+
+In order to protect and endpoint (for example, to require that only a logged in user
+or user with the appropriate security token can access a resource) you need to use
+the appropriate milestone hooks.
+
+Below is an example of how to do this with standard Express middleware, which is
+commonly used to protect resources.  Note that the callback functions required by
+Epilogue milestones look similar to express middleware, but the third argument (`context`)
+is different.
+
+Suppose you have this resource:
+
+```javascript
+var users = rest.resource({
+    model: User
+});
+```
+
+To protect all endpoints, we'll use `users.all.auth`, a hook used to authorize the
+endpoint before any operation (`create`, `list`, etc).  Suppose also we have an
+express middlware function called `authorize(req, res, done)`.   This authorize
+function might for example be a passport strategy such as `passport('local')`.
+
+To authorize the endpoint, you would do this:
+
+```javascript
+users.all.auth(function (req, res, context) {
+  var resolver = Promise.defer();
+
+  authorize(req, res, function (arg) {
+    if(arg) {
+      // Middleware function returned an error; this means the operation
+      // should not be authorized.
+      res.status(401).send({message: "Unauthorized"});
+      resolver.resolve(context.stop);
+    } else {
+      resolver.resolve(context.continue);
+    }
+  });
+
+  return resolver.promise;
+})
+```
+
+In this code, note that `users.all.auth` is simply reusing the express middleware
+to do whatever authorization checking your code requires.  We are passing a custom
+`done` function to the middleware, which resolves a promise as either `context.stop`
+or `context.continue`, indicating to epilogue whether or not to proceed.  Note that
+in the case where the transaction isn't authorized, epilogue won't proceed, so it
+is your responsibility to send a response back to the client.
+
+### Further Information on Protecting Endpoints
+
+The milestone documentation provides many other hooks for finer-grained operations,
+i.e. permitting all users to `list` but only some users to `delete` can be implemented
+by using the same approach described above, with different milestones.
 
 ## License
 
