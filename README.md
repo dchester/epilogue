@@ -42,7 +42,7 @@ epilogue.initialize({
 });
 
 // Create REST resource
-var users = epilogue.resource({
+var userResource = epilogue.resource({
   model: User,
   endpoints: ['/users', '/users/:id']
 });
@@ -146,7 +146,7 @@ epilogue.initialize({
     sequelize: sequelize
 });
 
-var users = epilogue.resource({
+var userResource = epilogue.resource({
     model: User,
     endpoints: ['/users', '/users/:id']
 });
@@ -230,7 +230,7 @@ Content-Type: application/json
 Search behavior can be customized to change the parameter used for searching, as well as which attributes are included in the search, like so:
 
 ```javascript
-var users = epilogue.resource({
+var userResource = epilogue.resource({
     model: User,
     endpoints: ['/users', '/users/:id'],
     search: {
@@ -249,7 +249,7 @@ $ curl http://localhost/users?searchOnlyUsernames=james
 By default, the substring search is performed using a ```{field} LIKE '%{query}%'``` pattern. However, this behavior can be customized by specifying a search operator. Valid operators include: `$like` (default), `$ilike`/`$iLike`, `$notLike`, `$notILike`, `$ne`, `$not`, `$gte`, `$gt`, `$lte`, `$lt`. All "\*like" operators can only be used against Sequelize.STRING or Sequelize.TEXT fields. For instance:
 
 ```javascript
-var users = epilogue.resource({
+var userResource = epilogue.resource({
     model: User,
     endpoints: ['/users', '/users/:id'],
     search: {
@@ -283,7 +283,7 @@ Content-Type: application/json
 Sort behavior can be customized to change the parameter used for sorting, as well as which attributes are allowed to be used for sorting like so:
 
 ```javascript
-var users = epilogue.resource({
+var userResource = epilogue.resource({
     model: User,
     endpoints: ['/users', '/users/:id'],
     sort: {
@@ -302,7 +302,7 @@ $ curl http://localhost/users?orderby=username
 Default sort criteria can be defined with the `default` attribute. The expected format for default sort criteria is exactly the same as if it was proceeding the `sort` parameter in the URL.
 
 ```javascript
-var users = epilogue.resource({
+var userResource = epilogue.resource({
     model: User,
     endpoints: ['/users', '/users/:id'],
     sort: {
@@ -354,7 +354,7 @@ Content-Range: items 200-299/3230
 Alternatively, you can specify that pagination is disabled for a given resource by passing false to the pagination property like so:
 
 ```javascript
-var users = epilogue.resource({
+var userResource = epilogue.resource({
     model: User,
     endpoints: ['/users', '/users/:id'],
     pagination: false
@@ -422,7 +422,7 @@ is different.
 Suppose you have this resource:
 
 ```javascript
-var users = rest.resource({
+var userResource = rest.resource({
     model: User
 });
 ```
@@ -436,20 +436,17 @@ To authorize the endpoint, you would do this:
 
 ```javascript
 users.all.auth(function (req, res, context) {
-  var resolver = Promise.defer();
-
-  authorize(req, res, function (arg) {
-    if(arg) {
-      // Middleware function returned an error; this means the operation
-      // should not be authorized.
-      res.status(401).send({message: "Unauthorized"});
-      resolver.resolve(context.stop);
-    } else {
-      resolver.resolve(context.continue);
-    }
+  return new Promise(function(resolve, reject) {
+    authorize(req, res, function (arg) {
+      if (arg) {
+        // Middleware function returned an error; this means the operation
+        // should not be authorized.
+        res.status(401).send({message: "Unauthorized"});
+        resolve(context.stop);
+      } else {
+        resolve(context.continue);
+      }
   });
-
-  return resolver.promise;
 })
 ```
 
