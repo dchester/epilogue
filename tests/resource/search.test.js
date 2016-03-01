@@ -147,6 +147,21 @@ describe('Resource(search)', function() {
       ]
     },
     {
+      name: 'filter by query when multiple parameters',
+      config: {
+        model: function() { return test.models.User; },
+        search: [
+          { param: 'name', attributes: ['username']},
+          { param: 'q'}
+        ]
+      },
+      query: 'hur',
+      expectedResults: [
+        { username: 'arthur', email: 'arthur@gmail.com' },
+        { username: 'arthur', email: 'aaaaarthur@gmail.com' }
+      ]
+    },
+    {
       name: 'filter by boolean attribute',
       config: {
         model: function() { return test.models.Task; },
@@ -176,6 +191,20 @@ describe('Resource(search)', function() {
         endpoints: ['/tasks', '/tasks/:id']
       },
       extraQuery: 'priority=3',
+      expectedResults: [
+        { name: 'eat lunch', finished: false, priority: 3 }
+      ]
+    },
+    {
+      name: 'filter by multiple parameters',
+      config: {
+        model: function() { return test.models.Task; },
+        endpoints: ['/tasks', '/tasks/:id'],
+        search: [
+          {param: 'task-name', attributes: ['name']}
+        ]
+      },
+      extraQuery: 'task-name=lunch',
       expectedResults: [
         { name: 'eat lunch', finished: false, priority: 3 }
       ]
