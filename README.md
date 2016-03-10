@@ -66,11 +66,11 @@ On the server we now have the following controllers and endpoints:
 
 Controller | Endpoint | Description
 -----------|----------|------------
-users.create | POST /users | Create a user
-users.list | GET /users  | Get a listing of users
-users.read | GET /users/:id | Get details about a user
-users.update | PUT /users/:id | Update a user
-users.delete | DELETE /users/:id | Delete a user
+userResource.create | POST /users | Create a user
+userResource.list | GET /users  | Get a listing of users
+userResource.read | GET /users/:id | Get details about a user
+userResource.update | PUT /users/:id | Update a user
+userResource.delete | DELETE /users/:id | Delete a user
 
 ### Customize behavior
 
@@ -83,7 +83,7 @@ We have these milestones to work with: `start`, `auth`, `fetch`, `data`, `write`
 var ForbiddenError = require('epilogue').Errors.ForbiddenError;
 
 // disallow deletes on users
-users.delete.auth(function(req, res, context) {
+userResource.delete.auth(function(req, res, context) {
     throw new ForbiddenError("can't delete a user");
     // optionally:
     // return context.error(403, "can't delete a user");
@@ -94,7 +94,7 @@ We can set behavior for milestones directly as above, or we can add functionalit
 
 ```javascript
 // check the cache first
-users.list.fetch.before(function(req, res, context) {
+userResource.list.fetch.before(function(req, res, context) {
 	var instance = cache.get(context.criteria);
 
 	if (instance) {
@@ -151,7 +151,7 @@ var userResource = epilogue.resource({
     endpoints: ['/users', '/users/:id']
 });
 
-users.use(restMiddleware);
+userResource.use(restMiddleware);
 ```
 
 Epilogue middleware also supports bundling in extra resource configuration by specifying
@@ -427,7 +427,7 @@ var userResource = rest.resource({
 });
 ```
 
-To protect all endpoints, we'll use `users.all.auth`, a hook used to authorize the
+To protect all endpoints, we'll use `userResource.all.auth`, a hook used to authorize the
 endpoint before any operation (`create`, `list`, etc).  Suppose also we have an
 express middlware function called `authorize(req, res, done)`.   This authorize
 function might for example be a passport strategy such as `passport('local')`.
@@ -435,7 +435,7 @@ function might for example be a passport strategy such as `passport('local')`.
 To authorize the endpoint, you would do this:
 
 ```javascript
-users.all.auth(function (req, res, context) {
+userResource.all.auth(function (req, res, context) {
   return new Promise(function(resolve, reject) {
     authorize(req, res, function (arg) {
       if (arg) {
@@ -450,7 +450,7 @@ users.all.auth(function (req, res, context) {
 })
 ```
 
-In this code, note that `users.all.auth` is simply reusing the express middleware
+In this code, note that `userResource.all.auth` is simply reusing the express middleware
 to do whatever authorization checking your code requires.  We are passing a custom
 `done` function to the middleware, which resolves a promise as either `context.stop`
 or `context.continue`, indicating to epilogue whether or not to proceed.  Note that
