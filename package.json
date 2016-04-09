@@ -1,7 +1,7 @@
 {
   "name": "epilogue",
   "description": "Create REST resources and controllers with Sequelize and Express or Restify",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "author": "David Chester <dchester@shutterstock.com>",
   "contributors": [
     {
@@ -36,7 +36,7 @@
   "dependencies": {
     "bluebird": "^3.0.0",
     "inflection": "^1.7.1",
-    "lodash": "^3.10.1"
+    "lodash": "^4.8.2"
   },
   "devDependencies": {
     "body-parser": "^1.13.3",

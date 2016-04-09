@@ -61,7 +61,7 @@ describe('Resource(sort)', function() {
         var records = JSON.parse(body).map(function(r) {
           return _.omit(r, 'id');
         });
-        expect(records).to.eql(_.sortByAll(test.userlist, ['username']));
+        expect(records).to.eql(_.sortBy(test.userlist, ['username']));
         done();
     });
   });
@@ -82,7 +82,7 @@ describe('Resource(sort)', function() {
       var records = JSON.parse(body).map(function(r) {
         return _.omit(r, 'id');
       });
-      expect(records).to.eql(_.sortByAll(test.userlist, ['email']));
+      expect(records).to.eql(_.sortBy(test.userlist, ['email']));
       done();
     });
   });
@@ -103,7 +103,7 @@ describe('Resource(sort)', function() {
       var records = JSON.parse(body).map(function(r) {
         return _.omit(r, 'id');
       });
-      expect(records).to.eql(_.sortByAll(test.userlist, ['email']));
+      expect(records).to.eql(_.sortBy(test.userlist, ['email']));
       done();
     });
   });
@@ -124,7 +124,7 @@ describe('Resource(sort)', function() {
       var records = JSON.parse(body).map(function(r) {
         return _.omit(r, 'id');
       });
-      expect(records).to.eql(_.sortByAll(test.userlist, ['email']));
+      expect(records).to.eql(_.sortBy(test.userlist, ['email']));
       done();
     });
   });
@@ -145,7 +145,7 @@ describe('Resource(sort)', function() {
       var records = JSON.parse(body).map(function(r) {
         return _.omit(r, 'id');
       });
-      expect(records).to.eql(_.sortByAll(test.userlist, ['username']));
+      expect(records).to.eql(_.sortBy(test.userlist, ['username']));
       done();
     });
   });

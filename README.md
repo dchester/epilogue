@@ -66,11 +66,11 @@ On the server we now have the following controllers and endpoints:
 
 Controller | Endpoint | Description
 -----------|----------|------------
-users.create | POST /users | Create a user
-users.list | GET /users  | Get a listing of users
-users.read | GET /users/:id | Get details about a user
-users.update | PUT /users/:id | Update a user
-users.delete | DELETE /users/:id | Delete a user
+userResource.create | POST /users | Create a user
+userResource.list | GET /users  | Get a listing of users
+userResource.read | GET /users/:id | Get details about a user
+userResource.update | PUT /users/:id | Update a user
+userResource.delete | DELETE /users/:id | Delete a user
 
 ### Customize behavior
 
@@ -83,7 +83,7 @@ We have these milestones to work with: `start`, `auth`, `fetch`, `data`, `write`
 var ForbiddenError = require('epilogue').Errors.ForbiddenError;
 
 // disallow deletes on users
-users.delete.auth(function(req, res, context) {
+userResource.delete.auth(function(req, res, context) {
     throw new ForbiddenError("can't delete a user");
     // optionally:
     // return context.error(403, "can't delete a user");
@@ -94,7 +94,7 @@ We can set behavior for milestones directly as above, or we can add functionalit
 
 ```javascript
 // check the cache first
-users.list.fetch.before(function(req, res, context) {
+userResource.list.fetch.before(function(req, res, context) {
 	var instance = cache.get(context.criteria);
 
 	if (instance) {
@@ -138,20 +138,20 @@ module.exports = {
 };
 
 // my-app.js
-var rest = require('epilogue'),
+var epilogue = require('epilogue'),
     restMiddleware = require('my-middleware');
 
-rest.initialize({
+epilogue.initialize({
     app: app,
     sequelize: sequelize
 });
 
-var users = rest.resource({
+var userResource = epilogue.resource({
     model: User,
     endpoints: ['/users', '/users/:id']
 });
 
-users.use(restMiddleware);
+userResource.use(restMiddleware);
 ```
 
 Epilogue middleware also supports bundling in extra resource configuration by specifying
@@ -230,7 +230,7 @@ Content-Type: application/json
 Search behavior can be customized to change the parameter used for searching, as well as which attributes are included in the search, like so:
 
 ```javascript
-var users = rest.resource({
+var userResource = epilogue.resource({
     model: User,
     endpoints: ['/users', '/users/:id'],
     search: {
@@ -249,7 +249,7 @@ $ curl http://localhost/users?searchOnlyUsernames=james
 By default, the substring search is performed using a ```{field} LIKE '%{query}%'``` pattern. However, this behavior can be customized by specifying a search operator. Valid operators include: `$like` (default), `$ilike`/`$iLike`, `$notLike`, `$notILike`, `$ne`, `$not`, `$gte`, `$gt`, `$lte`, `$lt`. All "\*like" operators can only be used against Sequelize.STRING or Sequelize.TEXT fields. For instance:
 
 ```javascript
-var users = rest.resource({
+var userResource = epilogue.resource({
     model: User,
     endpoints: ['/users', '/users/:id'],
     search: {
@@ -283,7 +283,7 @@ Content-Type: application/json
 Sort behavior can be customized to change the parameter used for sorting, as well as which attributes are allowed to be used for sorting like so:
 
 ```javascript
-var users = rest.resource({
+var userResource = epilogue.resource({
     model: User,
     endpoints: ['/users', '/users/:id'],
     sort: {
@@ -302,7 +302,7 @@ $ curl http://localhost/users?orderby=username
 Default sort criteria can be defined with the `default` attribute. The expected format for default sort criteria is exactly the same as if it was proceeding the `sort` parameter in the URL.
 
 ```javascript
-var users = rest.resource({
+var userResource = epilogue.resource({
     model: User,
     endpoints: ['/users', '/users/:id'],
     sort: {
@@ -354,7 +354,7 @@ Content-Range: items 200-299/3230
 Alternatively, you can specify that pagination is disabled for a given resource by passing false to the pagination property like so:
 
 ```javascript
-var users = rest.resource({
+var userResource = epilogue.resource({
     model: User,
     endpoints: ['/users', '/users/:id'],
     pagination: false
@@ -402,7 +402,66 @@ Create a resource and CRUD actions given a Sequelize model and endpoints.  Accep
 
 ### Milestones & Context
 
-Check out the [Milestone docs](/docs/Milestones.md)
+Check out the [Milestone docs](/docs/Milestones.md) for information on lifecycle
+hooks that can be used with epilogue resources, and how to run custom code at
+various points during a request.
+
+## Protecting Epilogue REST Endpoints
+
+To protect an endpoint, you must use [milestones](/docs/Milestones.md).
+
+In order to protect and endpoint (for example, to require that only a logged in user
+or user with the appropriate security token can access a resource) you need to use
+the appropriate milestone hooks.
+
+Below is an example of how to do this with standard Express middleware, which is
+commonly used to protect resources.  Note that the callback functions required by
+Epilogue milestones look similar to express middleware, but the third argument (`context`)
+is different.
+
+Suppose you have this resource:
+
+```javascript
+var userResource = rest.resource({
+    model: User
+});
+```
+
+To protect all endpoints, we'll use `userResource.all.auth`, a hook used to authorize the
+endpoint before any operation (`create`, `list`, etc).  Suppose also we have an
+express middlware function called `authorize(req, res, done)`.   This authorize
+function might for example be a passport strategy such as `passport('local')`.
+
+To authorize the endpoint, you would do this:
+
+```javascript
+userResource.all.auth(function (req, res, context) {
+  return new Promise(function(resolve, reject) {
+    authorize(req, res, function (arg) {
+      if (arg) {
+        // Middleware function returned an error; this means the operation
+        // should not be authorized.
+        res.status(401).send({message: "Unauthorized"});
+        resolve(context.stop);
+      } else {
+        resolve(context.continue);
+      }
+  });
+})
+```
+
+In this code, note that `userResource.all.auth` is simply reusing the express middleware
+to do whatever authorization checking your code requires.  We are passing a custom
+`done` function to the middleware, which resolves a promise as either `context.stop`
+or `context.continue`, indicating to epilogue whether or not to proceed.  Note that
+in the case where the transaction isn't authorized, epilogue won't proceed, so it
+is your responsibility to send a response back to the client.
+
+### Further Information on Protecting Endpoints
+
+The milestone documentation provides many other hooks for finer-grained operations,
+i.e. permitting all users to `list` but only some users to `delete` can be implemented
+by using the same approach described above, with different milestones.
 
 ## License
 
