@@ -203,17 +203,17 @@ You can override how errors are formatted for a milestone by setting the `action
 For example:
 
 ```javascript
-  resource.create.error = function(req, res, error) {
+  resource.controller.create.error = function(req, res, error) {
     res.status(500);
     res.json({message: 'Internal Error'});
   }
 ```
 
 The error object passed will be an EpilogueError. If the error is wrapping another error (for example a ValidationError
-from Sequelize) the original error can be found at `error.cause`
+from Sequelize) the original error can be found at `controller.error.cause`
 
 ```javascript
-  resource.create.error = function(req, res, error) {
+  resource.controller.create.error = function(req, res, error) {
     if(error.cause && error.cause instanceof sequelize.ValidationError) {
       res.status(400);
       res.json({message: 'Bad Request'});
