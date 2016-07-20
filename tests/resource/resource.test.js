@@ -402,6 +402,25 @@ describe('Resource(basic)', function() {
       });
     });
 
+    it('should reload instance on update, excluding selected attrs', function(done) {
+      var userData = { username: 'arthur', email: 'jamez@gmail.com' };
+      request.post({
+        url: test.baseUrl + '/usersWithExclude',
+        json: userData
+      }, function(error, response, body) {
+        expect(error).is.null;
+        expect(response.headers.location).is.not.empty;
+       var path = response.headers.location;
+         request.put({
+          url: test.baseUrl + path,
+          json: { email: 'emma@fmail.co.uk' }
+        }, function(err, response, body) {
+          expect(response.statusCode).to.equal(200);
+          expect(body).to.eql({ id: 1, username: 'arthur' });
+          done();
+      });
+    });
+  });
   });
 
   describe('delete', function() {
