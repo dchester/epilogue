@@ -206,6 +206,39 @@ Content-Type: application/json
 ]
 ```
 
+### Filtering using scope
+
+Use `scope` to add additional filtering (More about scopes in sequelize - [http://docs.sequelizejs.com/en/latest/docs/scopes/](http://docs.sequelizejs.com/en/latest/docs/scopes/)).
+
+```bash
+  // Define scope in model
+  ...
+  scope: {
+    verified: {
+      where : {
+        email_verified: true
+        phone_verified: true
+      }  
+    }
+  }
+```
+
+```bash
+$ curl http://localhost/users?scope=verified
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+  {
+    "name": "James Conrad",
+    "email": "jamesconrad@fastmail.fm"
+    "email_verified": true,
+    "phone_verified": true
+  }
+]
+```
+
 ### Search
 
 Use the `q` parameter to perform a substring search across all fields.

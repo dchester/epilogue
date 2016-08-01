@@ -30,6 +30,14 @@ describe('Resource(search)', function() {
       finished: test.Sequelize.BOOLEAN,
       priority: test.Sequelize.INTEGER
     }, {
+      scopes: {
+        finishedLowPriority : {
+          where: {
+            finished: true,
+            priority: 1
+          }
+        }
+      },
       underscored: true,
       timestamps: false
     });
@@ -207,6 +215,17 @@ describe('Resource(search)', function() {
       extraQuery: 'task-name=lunch',
       expectedResults: [
         { name: 'eat lunch', finished: false, priority: 3 }
+      ]
+    },
+    {
+      name: 'filter by scope',
+      config: {
+        model: function() { return test.models.Task; },
+        endpoints: ['/tasks', '/tasks/:id']
+      },
+      extraQuery: 'scope=finishedLowPriority',
+      expectedResults: [
+        { name: 'wake up', finished: true, priority: 1 }
       ]
     }
   ].forEach(function(testCase) {
