@@ -71,7 +71,51 @@ describe('Associations(HasMany)', function() {
   });
 
   // TESTS
+  describe('parent read', function() {
+
+    it('should return associated data in same request', function (done) {
+      request.get({
+        url: test.baseUrl + '/users/1'
+      }, function (error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result).to.eql({
+          "app": null,
+          "app_id": null,
+          "id": 1,
+          "name": "sumo",
+          "tasks": [
+            {id: 1, name: 'eat', user_id: 1},
+            {id: 2, name: 'sleep', user_id: 1},
+            {id: 3, name: 'eat again', user_id: 1}
+          ]
+        });
+        done();
+      });
+    });
+
+    it('should return associated data in same request (2)', function (done) {
+      request.get({
+        url: test.baseUrl + '/users/2'
+      }, function (error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result).to.eql({
+          "app": null,
+          "app_id": null,
+          "id": 2,
+          "name": "ninja",
+          "tasks": [
+            {id: 4, name: 'fight', user_id: 2}
+          ]
+        });
+        done();
+      });
+    });
+  });
+
   describe('read', function() {
+
     it('should return associated data by url', function(done) {
       request.get({
         url: test.baseUrl + '/users/1/tasks/1'
