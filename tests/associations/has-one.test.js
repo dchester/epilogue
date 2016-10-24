@@ -45,6 +45,34 @@ describe('Associations(HasOne)', function() {
           endpoints: ['/users', '/users/:id'],
           associations: true
         });
+
+        return Promise.all([
+          test.models.Address.create({
+            street: '221B Baker Street',
+            state_province: 'London',
+            postal_code: 'NW1',
+            country_code: '44'
+          }),
+          test.models.Address.create({
+            street: 'Avenue de l\'Atomium',
+            state_province: 'Brussels',
+            postal_code: '1020',
+            country_code: '32'
+          }),
+          test.models.User.create({
+            username: 'sherlock',
+            email: 'sherlock@holmes.com'
+          }),
+          test.models.User.create({
+            username: 'MannekenPis',
+            email: 'manneken.pis@brussels.be'
+          })
+        ]).spread(function(address, address2, user, user2) {
+          return user.setAddress(address).then(function() {
+            return user2.setAddress(address2);
+          });
+        });
+
       });
   });
 
@@ -54,35 +82,60 @@ describe('Associations(HasOne)', function() {
   });
 
   // TESTS
-  describe('read', function() {
-    beforeEach(function() {
-      return Promise.all([
-        test.models.Address.create({
-          street: '221B Baker Street',
-          state_province: 'London',
-          postal_code: 'NW1',
-          country_code: '44'
-        }),
-        test.models.Address.create({
-          street: 'Avenue de l\'Atomium',
-          state_province: 'Brussels',
-          postal_code: '1020',
-          country_code: '32'
-        }),
-        test.models.User.create({
-          username: 'sherlock',
-          email: 'sherlock@holmes.com'
-        }),
-        test.models.User.create({
-          username: 'MannekenPis',
-          email: 'manneken.pis@brussels.be'
-        })
-      ]).spread(function(address, address2, user, user2) {
-        return user.setAddress(address).then(function() {
-          return user2.setAddress(address2);
-        });
+  describe('parent read', function() {
+
+    it('should return associated data in same request', function (done) {
+      request.get({
+        url: test.baseUrl + '/users/1'
+      }, function (error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        var expected = {
+          id: 1,
+          username: "sherlock",
+          email: "sherlock@holmes.com",
+          address: {
+            id: 1,
+            street: '221B Baker Street',
+            state_province: 'London',
+            postal_code: 'NW1',
+            country_code: '44',
+            user_id: 1
+          }
+        };
+
+        expect(result).to.eql(expected);
+        done();
       });
     });
+
+    it('should return associated data in same request (2)', function (done) {
+      request.get({
+        url: test.baseUrl + '/users/2'
+      }, function (error, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        var expected = {
+          id: 2,
+          username: "MannekenPis",
+          email: "manneken.pis@brussels.be",
+          address: {
+            id: 2,
+            street: 'Avenue de l\'Atomium',
+            state_province: 'Brussels',
+            postal_code: '1020',
+            country_code: '32',
+            user_id: 2
+          }
+        };
+
+        expect(result).to.eql(expected);
+        done();
+      });
+    });
+  });
+
+  describe('read', function() {
 
     it('should return associated data by url', function(done) {
       request.get({

@@ -675,6 +675,28 @@ describe('Associations(BelongsTo)', function() {
       ]);
     });
 
+    it('should include the new associated data by nesting object data ', function(done) {
+      request.post({
+        url: test.baseUrl + '/users',
+        json: {
+          username: 'paddington',
+          address: {
+            street: '32 Windsor Gardens',
+            state_province: 'London',
+            postal_code: 'W9',
+            country_code: '44'
+          }
+        }
+      }, function(error, response, body) {
+        var result = _.isObject(body) ? body : JSON.parse(body);
+        expect(result.username).to.be.eql('paddington');
+        expect(result.address_id).to.be.eql(3);
+        expect(result.address).to.be.an('object');
+        expect(result.address.id).to.be.eql(3);
+        done();
+      });
+    });
+
     it('should include the new associated data by identifier of object nested', function(done) {
       request.post({
         url: test.baseUrl + '/users',
