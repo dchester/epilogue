@@ -292,6 +292,19 @@ var userResource = epilogue.resource({
 });
 ```
 
+You can also add multiple search parameters by passing the search key an array of objects like so:
+
+```javascript
+var userResource = epilogue.resource({
+    model: User,
+    endpoints: ['/users', '/users/:id'],
+    search: [
+      {operator: '$lte', param: 'maxAge', attributes: [ 'age' ]},
+      {param: 'searchOnlyUsernames', attributes: [ 'username' ]}
+    ] 
+});
+```
+
 ### Sorting
 
 Specify the `sort` parameter to sort results.  Values are field names, optionally preceded by a `-` to indicate descending order.  Multiple sort values may be separated by `,`.
