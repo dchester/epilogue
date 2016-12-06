@@ -24,7 +24,14 @@ describe('Resource(basic)', function() {
     }, {
       underscored: true,
       timestamps: false,
-      hooks: {
+      scopes: {
+        userNameStartsWithA: {
+          where: {
+            username: { $like: 'a%' }
+          }
+        }
+      },
+       hooks: {
         beforeFind: function(options) {
           if (this.enableBrokenFindTest) {
             this.enableBrokenFindTest = false;
@@ -690,6 +697,22 @@ describe('Resource(basic)', function() {
 
       return Promise.all(promises);
     });
+
+    it('should support scope to return a data subset', function(done) {
+      request.get({
+        url: test.baseUrl + '/users?scope=userNameStartsWithA'
+      }, function(err, response, body) {
+        expect(response.statusCode).to.equal(200);
+        var records = JSON.parse(body).map(function(r) { delete r.id; return r; });
+        expect(records).to.eql([
+          { username: 'arthur', email: 'arthur@gmail.com' },
+          { username: 'arthur', email: 'aaaaarthur@gmail.com' }
+        ]);
+        done();
+      });
+    });
+
+
 
   });
 
