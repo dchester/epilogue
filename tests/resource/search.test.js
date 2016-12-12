@@ -48,7 +48,8 @@ describe('Resource(search)', function() {
       { username: 'henry', email: 'henry@gmail.com' },
       { username: 'william', email: 'william@gmail.com' },
       { username: 'edward', email: 'edward@gmail.com' },
-      { username: 'arthur', email: 'aaaaarthur@gmail.com' }
+      { username: 'arthur', email: 'aaaaarthur@gmail.com' },
+      { username: '123', email: 'mike@gmail.com' }
     ];
 
     test.tasklist = [
@@ -86,7 +87,8 @@ describe('Resource(search)', function() {
         { username: 'henry', email: 'henry@gmail.com' },
         { username: 'william', email: 'william@gmail.com' },
         { username: 'edward', email: 'edward@gmail.com' },
-        { username: 'arthur', email: 'aaaaarthur@gmail.com' }
+        { username: 'arthur', email: 'aaaaarthur@gmail.com' },
+        { username: '123', email: 'mike@gmail.com' }
       ]
     },
     {
@@ -98,6 +100,16 @@ describe('Resource(search)', function() {
       },
       query: 'gmail.com',
       expectedResults: []
+    },
+    {
+      name: 'search with custom search attributes, number search for type STRING',
+      config: {
+        search: {
+          attributes: [ 'username' ]
+        }
+      },
+      query: '123',
+      expectedResults: [{ username: '123', email: 'mike@gmail.com' }]
     },
     {
       name: 'search with custom search param',
@@ -133,7 +145,9 @@ describe('Resource(search)', function() {
         { username: 'james', email: 'james@gmail.com' },
         { username: 'henry', email: 'henry@gmail.com' },
         { username: 'edward', email: 'edward@gmail.com' },
-        { username: 'arthur', email: 'aaaaarthur@gmail.com' }]
+        { username: 'arthur', email: 'aaaaarthur@gmail.com' },
+        { username: '123', email: 'mike@gmail.com' }
+      ]
     },
     {
       name: 'search in combination with filtered results',
